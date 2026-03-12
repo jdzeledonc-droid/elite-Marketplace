@@ -1,0 +1,28 @@
+# EliteMarket: AI-Driven Premium Marketplace (MVP)
+
+## Vision
+Minimalist, mobile-only marketplace for premium digital services (Marketing, UX/UI, Audiovisual).
+Focus on AI-First UI (Search as primary interaction) and Trust (Verified users + Escrow).
+
+## Tech Stack
+- Frontend: Vanilla HTML5, JavaScript, Tailwind CSS (CDN).
+- Backend: Supabase (Auth, PostgreSQL, RLS, Storage).
+- AI Architecture: Gemini 1.5 Pro via MCP for Content Moderation and Transaction Audit.
+- Philosophy: Hick's Law (minimize options), Mobile-Only, Search-First.
+
+## Core Data Model (Supabase/PostgreSQL)
+- `profiles`: Linked to `auth.users`. Fields: `id`, `username`, `user_role` (buyer/seller/admin), `is_verified`, `category`.
+- `leads`: Buyer interest registry. Fields: `id`, `buyer_id`, `seller_id`, `mensaje`, `status`.
+- `transactions`: Escrow system. Fields: `id`, `buyer_id`, `seller_id`, `amount`, `status` (pending/completed/disputed).
+
+## Critical Rules for Agents
+1. Supabase First: Ensure RLS and tables exist before UI implementation.
+2. AI-Driven: All content and transactions must be audited by an LLM before final status.
+3. No Frameworks: Use native APIs. No npm/pnpm/bundlers for the frontend.
+4. Design Dual: Sync components to Figma using `h2d-writer`.
+
+## Navigation Map
+- `/index.html`: Main AI-Search interface.
+- `/puestos/`: Vendor micro-sites.
+- `/supabase-schema.sql`: Source of truth for DB.
+- `/AGENTS.md`: Full architectural manual.

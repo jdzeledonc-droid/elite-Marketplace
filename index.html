@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EliteMarket | AI-Driven Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .view-section { display: none; min-height: 100vh; width: 100%; flex-direction: column; }
+        .view-active { display: flex !important; }
+        
+        /* Selectores de Onboarding */
+        .color-dot { width: 44px; height: 44px; border-radius: 999px; cursor: pointer; border: 4px solid #f1f5f9; transition: all 0.2s; }
+        .color-dot.active { border-color: #64748b !important; transform: scale(1.1); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        
+        .template-card { border: 2px solid #f1f5f9; border-radius: 28px; padding: 24px; cursor: pointer; transition: all 0.2s; background: white; text-align: left; width: 100%; }
+        .template-card.active { border-color: #000 !important; background-color: #f8fafc; transform: translateY(-2px); }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Chat bubbles */
+        .chat-bubble-me { background-color: black; color: white; border-radius: 20px 20px 0 20px; padding: 16px; max-width: 85%; align-self: flex-end; font-size: 14px; margin-bottom: 8px; }
+        .chat-bubble-them { background-color: #f1f5f9; color: #1e293b; border-radius: 20px 20px 20px 0; padding: 16px; max-width: 85%; align-self: flex-start; font-size: 14px; margin-bottom: 8px; }
+    </style>
+</head>
+<body class="text-slate-900 bg-slate-50/50 overflow-x-hidden">
+
+    <!-- 1. VISTA: AUTH (LOGIN/REGISTRO) -->
+    <section id="view-auth" class="view-section p-8 items-center justify-center relative">
+        <button onclick="showView('home')" class="absolute top-10 right-8 p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 active:scale-90 transition-all shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <div class="max-w-sm w-full fade-in">
+            <h1 class="text-5xl font-black tracking-tighter text-center mb-12">EliteMarket</h1>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Correo Electrónico</label>
+                    <input type="email" id="auth-email" class="w-full bg-white border-2 border-slate-100 rounded-[22px] px-6 py-4 text-sm font-medium outline-none focus:border-black transition-all shadow-sm" placeholder="hola@elite.com">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Contraseña</label>
+                    <input type="password" id="auth-password" class="w-full bg-white border-2 border-slate-100 rounded-[22px] px-6 py-4 text-sm outline-none focus:border-black transition-all shadow-sm" placeholder="••••••••">
+                </div>
+                
+                <div id="register-only" class="hidden space-y-5 pt-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Nombre Completo</label>
+                        <input type="text" id="auth-name" class="w-full bg-white border-2 border-slate-100 rounded-[22px] px-6 py-4 text-sm outline-none focus:border-black transition-all shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Tipo de Cuenta</label>
+                        <select id="auth-role" class="w-full bg-white border-2 border-slate-100 rounded-[22px] px-6 py-4 text-sm outline-none">
+                            <option value="buyer">🛒 Comprador</option>
+                            <option value="seller">💼 Vendedor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="btn-auth-main" onclick="handleAuth()" class="w-full bg-black text-white py-5 rounded-[22px] font-bold text-sm shadow-xl active:scale-95 transition-all mt-4">Entrar</button>
+                <button onclick="toggleAuthMode()" id="btn-auth-toggle" class="w-full py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">¿No tienes cuenta? Regístrate</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. VISTA: ONBOARDING (4 PASOS COMPLETOS) -->
+    <section id="view-onboarding" class="view-section p-8 items-center justify-center bg-white">
+        <div class="max-w-md w-full fade-in">
+            <!-- PASO 1: CATEGORÍA Y BIO -->
+            <div id="step-1" class="onboarding-step block">
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Paso 1 de 4</span>
+                <h2 class="text-4xl font-black tracking-tighter mt-4 mb-10">Tu Puesto</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Tu Expertise</label>
+                        <select id="ob-category" class="w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-black rounded-[24px] px-6 py-5 text-sm font-semibold outline-none transition-all shadow-inner">
+                            <option value="UX/UI">Arquitectura UX/UI</option>
+                            <option value="Marketing">Growth Marketing</option>
+                            <option value="Audiovisual">Audiovisual Pro</option>
+                            <option value="Fisico">Productos Físicos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Sobre ti</label>
+                        <textarea id="ob-bio" rows="4" class="w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-black rounded-[24px] px-6 py-5 text-sm outline-none transition-all shadow-inner" placeholder="Explica qué ofreces al mundo..."></textarea>
+                    </div>
+                    <button onclick="nextOBStep(2)" class="w-full bg-black text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-all">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- PASO 2: VERIFICACIÓN IA -->
+            <div id="step-2" class="onboarding-step hidden text-center">
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Paso 2 de 4</span>
+                <h2 class="text-4xl font-black tracking-tighter mt-4 mb-6">Confianza IA</h2>
+                <p class="text-slate-400 mb-10 text-sm">Validamos tu identidad para otorgarte el badge de confianza.</p>
+                <div class="w-32 h-32 bg-slate-50 rounded-full mx-auto mb-10 flex items-center justify-center border-2 border-dashed border-slate-200 text-slate-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                </div>
+                <button onclick="simulateAIVerification()" class="w-full bg-blue-600 text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-all">Iniciar Escaneo IA</button>
+                <button onclick="nextOBStep(3)" class="w-full py-4 text-xs font-bold text-slate-300 uppercase mt-4">Omitir</button>
+            </div>
+
+            <!-- PASO 3: DISEÑO (COLOR + PLANTILLA) -->
+            <div id="step-3" class="onboarding-step hidden">
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Paso 3 de 4</span>
+                <h2 class="text-4xl font-black tracking-tighter mt-4 mb-8">Personalización</h2>
+                
+                <div class="mb-8">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4">Color de Identidad</label>
+                    <div class="flex flex-wrap gap-4" id="color-selector">
+                        <div class="color-dot active bg-black" data-color="black" onclick="selectColor(this, 'black')"></div>
+                        <div class="color-dot bg-red-500" data-color="red" onclick="selectColor(this, 'red')"></div>
+                        <div class="color-dot bg-yellow-400" data-color="yellow" onclick="selectColor(this, 'yellow')"></div>
+                        <div class="color-dot bg-blue-500" data-color="blue" onclick="selectColor(this, 'blue')"></div>
+                        <div class="color-dot bg-green-500" data-color="green" onclick="selectColor(this, 'green')"></div>
+                        <div class="color-dot bg-white border-slate-200" data-color="white" onclick="selectColor(this, 'white')"></div>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4">Plantilla de Estilo</label>
+                    <div class="space-y-3">
+                        <div class="template-card active" onclick="selectTheme(this, 'minimal')">
+                            <h4 class="font-bold text-sm">Minimalista</h4>
+                            <p class="text-[10px] text-slate-400">Perfecto para consultores y código.</p>
+                        </div>
+                        <div class="template-card" onclick="selectTheme(this, 'portfolio')">
+                            <h4 class="font-bold text-sm">Portfolio Visual</h4>
+                            <p class="text-[10px] text-slate-400">Enfoque en imágenes y arte.</p>
+                        </div>
+                        <div class="template-card" onclick="selectTheme(this, 'store')">
+                            <h4 class="font-bold text-sm">Elite Store</h4>
+                            <p class="text-[10px] text-slate-400">Optimizado para vender productos.</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="nextOBStep(4)" class="w-full bg-black text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-all">Siguiente</button>
+            </div>
+
+            <!-- PASO 4: CATÁLOGO -->
+            <div id="step-4" class="onboarding-step hidden">
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Paso 4 de 4</span>
+                <h2 class="text-4xl font-black tracking-tighter mt-4 mb-10">Primer Item</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Nombre</label>
+                        <input type="text" id="ob-service-name" class="w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-black rounded-[24px] px-6 py-5 text-sm outline-none shadow-inner" placeholder="Ej: Auditoría UX Express">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Precio (USD)</label>
+                        <input type="number" id="ob-service-price" class="w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-black rounded-[24px] px-6 py-5 text-sm outline-none shadow-inner" placeholder="0.00">
+                    </div>
+                    <button onclick="finishOnboarding()" class="w-full bg-black text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-all mt-4">Publicar mi Puesto</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. VISTA: HOME (EXPLORACIÓN) -->
+    <section id="view-home" class="view-section">
+        <header class="p-8 pt-16 flex items-start justify-between">
+            <div>
+                <h1 class="text-[10px] font-bold tracking-[0.3em] uppercase text-slate-300 mb-2 text-left">EliteMarket Pro</h1>
+                <p id="greeting" class="text-4xl font-light tracking-tight text-slate-900 leading-none">Hola, <span class="font-bold text-black">bienvenido</span></p>
+            </div>
+            <button id="header-login-btn" onclick="showView('auth')" class="bg-black text-white px-5 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl active:scale-90 transition-all">Entrar</button>
+        </header>
+        <main class="flex-grow p-8 pb-32 text-left">
+            <div class="relative mb-12">
+                <textarea id="ai-search" rows="2" class="w-full bg-white border border-slate-100 rounded-[32px] p-8 text-xl font-medium outline-none shadow-sm placeholder:text-slate-300" placeholder="¿Qué estás buscando?"></textarea>
+                <button onclick="simulateSearch()" class="absolute bottom-5 right-5 bg-black text-white p-4 rounded-2xl shadow-lg active:scale-90 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                </button>
+            </div>
+            <h2 id="results-title" class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-3"><span class="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span> Recomendados</h2>
+            <div id="results-container" class="space-y-6"></div>
+        </main>
+    </section>
+
+    <!-- 4. VISTA: BOOTH (PERFIL DEL VENDEDOR) -->
+    <section id="view-booth" class="view-section bg-white pb-32"><div id="booth-full-content" class="fade-in"></div></section>
+    
+    <!-- 5. VISTA: SELLER PANEL (GESTIÓN) -->
+    <section id="view-seller" class="view-section p-8 pb-32">
+        <header class="mb-10 pt-8 flex items-center justify-between"><div><h1 class="text-[10px] font-bold tracking-widest uppercase text-slate-300 mb-2 text-left">Mi Gestión</h1><h2 class="text-4xl font-black tracking-tight text-left">Negocio</h2></div></header>
+        <div class="grid grid-cols-2 gap-4 mb-10">
+            <div class="p-8 bg-black text-white rounded-[40px] shadow-2xl shadow-black/20 text-left"><p class="text-[9px] font-bold opacity-40 uppercase tracking-widest mb-1">Ventas</p><p class="text-3xl font-bold tracking-tighter">$0</p></div>
+            <div class="p-8 bg-white border border-slate-100 rounded-[40px] shadow-sm text-left"><p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-1">Leads</p><p class="text-3xl font-bold tracking-tighter">0</p></div>
+        </div>
+        <div class="flex items-center justify-between mb-8"><h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Catálogo Actual</h3><button onclick="addService()" class="text-[10px] font-bold border-b-2 border-black pb-1">+ Añadir Item</button></div>
+        <div id="my-services" class="space-y-4"></div>
+    </section>
+
+    <!-- 6. VISTA: CHAT LIST -->
+    <section id="view-chat" class="view-section p-8 pb-32 text-center">
+        <header class="pt-16 text-4xl font-black tracking-tight">Mensajes</header>
+        <main class="mt-10 space-y-4" id="chat-list-container"></main>
+    </section>
+
+    <!-- 7. VISTA: CONVO ABIERTA -->
+    <section id="view-convo" class="view-section bg-slate-50">
+        <header class="p-6 pt-12 flex items-center gap-4 bg-white/80 backdrop-blur-xl border-b border-slate-100 fixed top-0 w-full z-10 shadow-sm">
+            <button onclick="showView('chat')" class="p-3 bg-slate-50 rounded-2xl active:scale-90 transition-all"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg></button>
+            <div id="convo-avatar" class="w-11 h-11 rounded-2xl overflow-hidden shadow-sm"></div>
+            <div class="text-left"><h3 class="font-bold text-sm tracking-tight" id="convo-name">Experto</h3><p class="text-[10px] text-green-500 font-bold uppercase tracking-widest">En Línea</p></div>
+        </header>
+        <main class="flex-grow p-6 pt-36 pb-36 space-y-5 flex flex-col overflow-y-auto" id="messages-container"></main>
+        <footer class="p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 fixed bottom-0 w-full z-10">
+            <div class="flex items-center gap-3"><input type="text" id="chat-input" placeholder="Escribe un mensaje..." class="w-full bg-slate-100 border-none rounded-2xl p-4 text-sm font-medium outline-none focus:bg-white transition-all shadow-inner"><button onclick="sendMessage()" class="bg-black text-white p-4 rounded-2xl shadow-lg active:scale-90 transition-all"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925L10.74 10l-7.047 1.836-1.414 4.925a.75.75 0 00.826.95 48.134 48.134 0 0014.532-8.243.75.75 0 000-1.136 48.133 48.133 0 00-14.532-8.243z" /></svg></button></div>
+        </footer>
+    </section>
+    
+    <!-- 8. VISTA: PROFILE -->
+    <section id="view-profile" class="view-section p-8 items-center justify-center">
+        <header class="mb-14 text-center">
+            <div class="relative w-32 h-32 mx-auto mb-6">
+                <div class="w-full h-full bg-white border border-slate-100 rounded-[48px] p-2 shadow-2xl shadow-black/5 overflow-hidden"><img id="profile-avatar-img" src="" class="w-full h-full object-cover"></div>
+                <div id="verification-badge" class="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-2xl border-4 border-white hidden shadow-xl shadow-blue-200"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0 1 12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307Zm7.007 6.387a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" /></svg></div>
+            </div>
+            <h2 id="profile-name" class="text-4xl font-black tracking-tight text-black">Invitado</h2>
+            <div id="profile-role-status" class="mt-3"></div>
+        </header>
+        <div id="profile-actions" class="max-w-sm w-full space-y-6 bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 text-left">
+            <div id="account-switcher-container" class="hidden">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Cuenta Activa</label>
+                <select id="role-dropdown" onchange="handleRoleChange(this.value)" class="w-full bg-slate-50 border-2 border-transparent focus:border-black rounded-[22px] px-6 py-4 text-sm font-bold outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22currentColor%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.2em_1.2em] bg-[right_1.5rem_center] bg-no-repeat transition-all">
+                    <option value="buyer">🛒 Comprador</option>
+                    <option value="seller">💼 Vendedor / Experto</option>
+                </select>
+            </div>
+            <div id="guest-login-container"></div>
+            <button id="logout-btn" class="w-full py-4 text-slate-400 font-bold text-[10px] uppercase tracking-widest hidden active:text-black transition-all" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </section>
+
+    <!-- OVERLAYS IA -->
+    <div id="ai-modal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl hidden flex-col items-center justify-center p-12 text-center text-white">
+        <div class="w-24 h-24 border-4 border-white/20 border-t-white rounded-full animate-spin mb-10"></div>
+        <h3 id="ai-modal-title" class="text-4xl font-black mb-4 tracking-tighter text-white uppercase">AI Analysis</h3>
+        <p id="ai-status" class="text-slate-400 text-lg max-w-xs font-medium leading-relaxed italic"></p>
+    </div>
+
+    <!-- RE-AUTH MODAL -->
+    <div id="modal-reauth" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl hidden flex-col items-center justify-center p-8 text-white text-center">
+        <div class="max-w-sm w-full fade-in">
+            <h3 class="text-3xl font-bold mb-4 tracking-tight">Identidad</h3>
+            <p class="text-slate-400 mb-8 text-sm text-center">Cambiando a modo <span id="target-role-name" class="font-bold text-white"></span>. Ingresa tu contraseña.</p>
+            <input type="password" id="reauth-pass" class="w-full bg-white/10 border border-white/20 rounded-[22px] px-6 py-4 text-white outline-none mb-6 text-center shadow-inner" placeholder="••••••••">
+            <div class="flex gap-3"><button onclick="confirmRoleSwitch()" class="flex-grow bg-white text-black py-4 rounded-[22px] font-bold active:scale-95 transition-all shadow-xl">Confirmar</button><button onclick="closeReauth()" class="px-6 py-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest">Cerrar</button></div>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <nav id="main-nav" class="fixed bottom-10 left-1/2 -translate-x-1/2 w-[85%] px-10 py-6 glass rounded-[44px] border border-white/50 shadow-2xl hidden items-center justify-between z-40 shadow-black/10">
+        <button onclick="showView('home')" class="nav-btn active:scale-90 transition-all" data-view="home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7"><path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" /><path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.432z" /></svg></button>
+        <button id="nav-seller-btn" onclick="showView('seller')" class="nav-btn text-slate-300 hidden active:scale-90 transition-all" data-view="seller"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7"><path d="M5.223 2.25c-.497 0-.974.198-1.325.55l-1.3 1.298A3.75 3.75 0 007.5 9.75c.616 0 1.2-.148 1.723-.412.115.342.29.658.51.936a3.751 3.751 0 007.534 0c.22-.278.395-.594.51-.936.523.264 1.107.412 1.723.412a3.75 3.75 0 004.902-5.652l-1.3-1.298a1.875 1.875 0 00-1.326-.55H5.223z" /><path fill-rule="evenodd" d="M3 10.8c0 1.503.454 2.899 1.228 4.047a.75.75 0 00.15.185l2.25 2.25a.75.75 0 001.06 0l2.25-2.25a.75.75 0 00.15-.185c.774-1.148 1.228-2.544 1.228-4.047V10.8z" clip-rule="evenodd" /></svg></button>
+        <button onclick="showView('chat')" class="nav-btn text-slate-300 active:scale-90 transition-all" data-view="chat"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7"><path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.521 1.582.232 2.707 1.626 2.707 3.228V12.24c0 1.602-1.125 2.996-2.707 3.228a49.144 49.144 0 01-7.152.521c-2.43 0-4.817-.178-7.152-.521-1.582-.232-2.707-1.626-2.707-3.228V5.999c0-1.602 1.125-2.996 2.707-3.228zm11.402 4.479a.75.75 0 00-1.06-1.06l-4.5 4.5a.75.75 0 000 1.06l4.5 4.5a.75.75 0 001.06-1.06L12.56 11.25l3.69-3.75z" clip-rule="evenodd" /></svg></button>
+        <button onclick="showView('profile')" class="nav-btn text-slate-300 active:scale-90 transition-all" data-view="profile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7"><path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12c0 2.741 1.132 5.22 2.949 7.001a9.75 9.75 0 0113.486 0zM12 12a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd" /></svg></button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
