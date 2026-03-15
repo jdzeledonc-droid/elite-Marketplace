@@ -1,0 +1,187 @@
+/* ── Google Fonts: Inter ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── EliteMarket Design Tokens ───────────────────────────────────────────── */
+:root {
+  /* Colors — Primitives */
+  --color-black:        #000000;
+  --color-white:        #ffffff;
+  --color-slate-50:     #f8fafc;
+  --color-slate-100:    #f1f5f9;
+  --color-slate-200:    #e2e8f0;
+  --color-slate-300:    #cbd5e1;
+  --color-slate-400:    #94a3b8;
+  --color-slate-500:    #64748b;
+  --color-slate-600:    #475569;
+  --color-slate-700:    #334155;
+  --color-slate-800:    #1e293b;
+  --color-slate-900:    #0f172a;
+  --color-red-400:      #f87171;
+  --color-red-500:      #ef4444;
+  --color-yellow-400:   #facc15;
+  --color-yellow-500:   #f59e0b;
+  --color-blue-400:     #60a5fa;
+  --color-blue-500:     #3b82f6;
+  --color-blue-600:     #2563eb;
+  --color-green-400:    #34d399;
+  --color-green-500:    #10b981;
+
+  /* Colors — Aliases (semantic) */
+  --color-primary:        var(--color-black);
+  --color-primary-hover:  var(--color-slate-800);
+  --color-primary-light:  var(--color-slate-50);
+  --color-success:        var(--color-green-500);
+  --color-warning:        var(--color-yellow-500);
+  --color-error:          var(--color-red-500);
+  --color-info:           var(--color-blue-500);
+  --color-verified:       var(--color-blue-600);
+
+  /* Colors — Accent (seller customization) */
+  --color-accent-black:   #000000;
+  --color-accent-red:     #ef4444;
+  --color-accent-yellow:  #f59e0b;
+  --color-accent-blue:    #3b82f6;
+  --color-accent-green:   #10b981;
+  --color-accent-white:   #ffffff;
+
+  /* Colors — Backgrounds */
+  --color-bg-primary:     var(--color-white);
+  --color-bg-secondary:   var(--color-slate-50);
+  --color-bg-tertiary:    var(--color-slate-100);
+
+  /* Colors — Borders */
+  --color-border-light:   var(--color-slate-100);
+  --color-border-medium:  var(--color-slate-200);
+
+  /* Colors — Text */
+  --color-text-primary:   var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-600);
+  --color-text-tertiary:  var(--color-slate-400);
+  --color-text-muted:     var(--color-slate-300);
+
+  /* Typography */
+  --font-family:            'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-weight-light:      300;
+  --font-weight-regular:    400;
+  --font-weight-medium:     500;
+  --font-weight-semibold:   600;
+  --font-weight-bold:       700;
+  --font-weight-extrabold:  800;
+  --font-weight-black:      900;
+
+  /* Font Sizes */
+  --text-2xs:   10px;
+  --text-xs:    11px;
+  --text-sm:    13px;
+  --text-base:  14px;
+  --text-md:    16px;
+  --text-lg:    18px;
+  --text-xl:    20px;
+  --text-2xl:   24px;
+  --text-3xl:   30px;
+  --text-4xl:   36px;
+  --text-5xl:   48px;
+
+  /* Spacing (4px base) */
+  --space-1:    4px;
+  --space-2:    8px;
+  --space-3:    12px;
+  --space-4:    16px;
+  --space-5:    20px;
+  --space-6:    24px;
+  --space-8:    32px;
+  --space-10:   40px;
+  --space-12:   48px;
+  --space-16:   64px;
+
+  /* Border Radius */
+  --radius-sm:          12px;
+  --radius-md:          16px;
+  --radius-chat-bubble: 20px;
+  --radius-lg:          22px;
+  --radius-xl:          28px;
+  --radius-2xl:         32px;
+  --radius-3xl:         40px;
+  --radius-4xl:         44px;
+  --radius-full:        999px;
+
+  /* Shadows */
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:    0 4px 6px -1px rgba(0,0,0,0.06);
+  --shadow-lg:    0 10px 15px -3px rgba(0,0,0,0.08);
+  --shadow-xl:    0 20px 25px -5px rgba(0,0,0,0.1);
+  --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-booth: 0 -10px 40px rgba(0,0,0,0.1);
+
+  /* Glass Effect */
+  --glass-bg:   rgba(255, 255, 255, 0.75);
+  --glass-blur: 20px;
+
+  /* Transitions */
+  --transition-fast:   0.15s ease;
+  --transition-base:   0.2s ease;
+  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-Index */
+  --z-base:    1;
+  --z-overlay: 10;
+  --z-modal:   20;
+  --z-nav:     30;
+  --z-toast:   40;
+
+  /* Avatar Sizing */
+  --avatar-sm: 48px;
+  --avatar-md: 64px;
+  --avatar-lg: 112px;
+}
+
+/* ── Base Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Allow user zoom — WCAG 1.4.4 */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100dvh;
+  max-width: 430px; /* mobile-first max width */
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-pulse-em { animation: pulse 2s ease-in-out infinite; }
+
+/* ── Focus visible (WCAG) ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
