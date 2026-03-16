@@ -4,10 +4,12 @@ import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import NavBar from '../components/layout/NavBar'
-import { MOCK_USER, MOCK_SELLERS } from '../lib/mockData'
+import { MOCK_SELLERS } from '../lib/mockData'
+import { useAuth } from '../hooks/useAuth'
 
 export default function SellerPanel() {
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
   const seller = MOCK_SELLERS[0]
   const [activeTab, setActiveTab] = useState('services')
 
@@ -32,10 +34,10 @@ export default function SellerPanel() {
       {/* Header */}
       <header className="px-[var(--space-6)] pt-[var(--space-8)] pb-[var(--space-5)] border-b border-[var(--color-border-light)]">
         <div className="flex items-center gap-[var(--space-4)] mb-[var(--space-5)]">
-          <Avatar src={MOCK_USER.avatar} alt={MOCK_USER.name} size="md" />
+          <Avatar src={currentUser?.avatar} alt={currentUser?.name ?? ''} size="md" />
           <div className="flex-1">
             <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">Mi panel</p>
-            <h1 className="text-[var(--text-xl)] font-black text-[var(--color-text-primary)]">{MOCK_USER.name}</h1>
+            <h1 className="text-[var(--text-xl)] font-black text-[var(--color-text-primary)]">{currentUser?.name}</h1>
           </div>
           <Button variant="secondary" size="sm" onClick={() => navigate('/seller/1')}
             aria-label="Ver mi booth público">
@@ -70,12 +72,12 @@ export default function SellerPanel() {
           <section id="tabpanel-services" role="tabpanel" aria-label="Mis servicios" className="animate-fade-in">
             <div className="flex items-center justify-between mb-[var(--space-5)]">
               <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
-                {seller.services.length} servicios
+                {seller.items.length} servicios
               </p>
               <Button variant="ghost" size="sm">+ Agregar</Button>
             </div>
             <ul className="flex flex-col gap-[var(--space-3)]" role="list">
-              {seller.services.map(svc => (
+              {seller.items.map(svc => (
                 <li key={svc.id}>
                   <article className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-light)] rounded-[var(--radius-2xl)] p-[var(--space-5)]">
                     <div className="flex items-start justify-between gap-[var(--space-3)]">
@@ -139,7 +141,7 @@ export default function SellerPanel() {
                 { label: 'Visitas al booth', value: '248' },
                 { label: 'Leads recibidos',  value: '12'  },
                 { label: 'Rating promedio',  value: '4.9' },
-                { label: 'Servicios activos', value: String(seller.services.length) },
+                { label: 'Servicios activos', value: String(seller.items.length) },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-light)] rounded-[var(--radius-2xl)] p-[var(--space-5)]">
                   <p className="text-[var(--text-3xl)] font-black text-[var(--color-text-primary)]">{value}</p>

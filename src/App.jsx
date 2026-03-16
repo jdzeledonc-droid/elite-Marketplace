@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './hooks/useAuth'
 
 import Home from './views/Home'
 import Login from './views/Login'
@@ -13,24 +14,37 @@ import Transactions from './views/Transactions'
 import Settings from './views/Settings'
 import Help from './views/Help'
 
+function ProtectedRoute({ children }) {
+  const { currentUser } = useAuth()
+  return currentUser ? children : <Navigate to="/login" replace />
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/"             element={<Home />} />
+      <Route path="/login"        element={<Login />} />
+      <Route path="/register"     element={<Register />} />
+      <Route path="/seller/:id"   element={<Booth />} />
+      <Route path="/onboarding"   element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+      <Route path="/sell"         element={<ProtectedRoute><SellerPanel /></ProtectedRoute>} />
+      <Route path="/chat"         element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
+      <Route path="/chat/:id"     element={<ProtectedRoute><Conversation /></ProtectedRoute>} />
+      <Route path="/profile"      element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+      <Route path="/settings"     element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/help"         element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      <Route path="*"             element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/"             element={<Home />} />
-        <Route path="/login"        element={<Login />} />
-        <Route path="/register"     element={<Register />} />
-        <Route path="/seller/:id"   element={<Booth />} />
-        <Route path="/onboarding"   element={<Onboarding />} />
-        <Route path="/sell"         element={<SellerPanel />} />
-        <Route path="/chat"         element={<ChatList />} />
-        <Route path="/chat/:id"     element={<Conversation />} />
-        <Route path="/profile"      element={<Profile />} />
-        <Route path="/transactions" element={<Transactions />} />
-        <Route path="/settings"     element={<Settings />} />
-        <Route path="/help"         element={<Help />} />
-        <Route path="*"             element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   )
 }

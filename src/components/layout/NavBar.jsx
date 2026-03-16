@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 
 /**
  * NavBar — bottom navigation bar
@@ -7,6 +8,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 export default function NavBar() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
 
   const items = [
     {
@@ -60,7 +62,8 @@ export default function NavBar() {
     },
   ]
 
-  // Hide nav on auth and onboarding screens
+  // Hide nav when not authenticated or on auth/onboarding screens
+  if (!currentUser) return null
   const hidden = ['/login', '/register', '/onboarding'].includes(location.pathname)
   if (hidden) return null
 

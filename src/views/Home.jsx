@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/ui/SearchBar'
 import SellerCard from '../components/ui/SellerCard'
 import NavBar from '../components/layout/NavBar'
-import { MOCK_SELLERS, CATEGORIES } from '../lib/mockData'
+import { MOCK_SELLERS, CATEGORY_GROUPS } from '../lib/mockData'
 
 /**
  * Home — exploración y búsqueda de vendedores
@@ -11,20 +11,36 @@ import { MOCK_SELLERS, CATEGORIES } from '../lib/mockData'
  */
 export default function Home() {
   const [query, setQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState('Todos')
+  const [activeGroup, setActiveGroup] = useState(null)
+  const [activeSubcategory, setActiveSubcategory] = useState(null)
   const navigate = useNavigate()
+
+  const currentGroup = activeGroup
+    ? CATEGORY_GROUPS.find(g => g.id === activeGroup)
+    : null
 
   const filtered = useMemo(() => {
     return MOCK_SELLERS.filter(seller => {
-      const matchesCategory = activeCategory === 'Todos' || seller.category === activeCategory
+      const matchesGroup = !activeGroup || seller.group === activeGroup
+      const matchesSub   = !activeSubcategory || seller.category === activeSubcategory
       const matchesQuery =
         !query ||
         seller.name.toLowerCase().includes(query.toLowerCase()) ||
         seller.tagline.toLowerCase().includes(query.toLowerCase()) ||
         seller.category.toLowerCase().includes(query.toLowerCase())
-      return matchesCategory && matchesQuery
+      return matchesGroup && matchesSub && matchesQuery
     })
-  }, [query, activeCategory])
+  }, [query, activeGroup, activeSubcategory])
+
+  function selectGroup(groupId) {
+    if (activeGroup === groupId) {
+      setActiveGroup(null)
+      setActiveSubcategory(null)
+    } else {
+      setActiveGroup(groupId)
+      setActiveSubcategory(null)
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-dvh bg-[var(--color-bg-primary)]">
@@ -55,28 +71,65 @@ export default function Home() {
 
         <SearchBar value={query} onChange={setQuery} resultsCount={filtered.length} />
 
-        {/* Category filters */}
+        {/* ── Grupos (nivel 1) ── */}
         <div
           className="flex gap-[var(--space-2)] mt-[var(--space-4)] overflow-x-auto pb-[var(--space-1)]"
           role="group"
           aria-label="Filtrar por categoría"
         >
-          {CATEGORIES.map(cat => (
+          <button
+            onClick={() => { setActiveGroup(null); setActiveSubcategory(null) }}
+            aria-pressed={!activeGroup}
+            className={[
+              'flex-shrink-0 px-[var(--space-4)] py-[var(--space-2)] rounded-full text-[var(--text-xs)] font-bold transition-colors',
+              !activeGroup
+                ? 'bg-[var(--color-primary)] text-white'
+                : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)]',
+            ].join(' ')}
+          >
+            Todos
+          </button>
+          {CATEGORY_GROUPS.map(group => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              aria-pressed={activeCategory === cat}
+              key={group.id}
+              onClick={() => selectGroup(group.id)}
+              aria-pressed={activeGroup === group.id}
               className={[
                 'flex-shrink-0 px-[var(--space-4)] py-[var(--space-2)] rounded-full text-[var(--text-xs)] font-bold transition-colors',
-                activeCategory === cat
+                activeGroup === group.id
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)]',
               ].join(' ')}
             >
-              {cat}
+              {group.label}
             </button>
           ))}
         </div>
+
+        {/* ── Subcategorías (nivel 2) — solo si hay grupo activo ── */}
+        {currentGroup && (
+          <div
+            className="flex gap-[var(--space-2)] mt-[var(--space-2)] overflow-x-auto pb-[var(--space-1)]"
+            role="group"
+            aria-label={`Subcategorías de ${currentGroup.label}`}
+          >
+            {currentGroup.subcategories.map(sub => (
+              <button
+                key={sub}
+                onClick={() => setActiveSubcategory(activeSubcategory === sub ? null : sub)}
+                aria-pressed={activeSubcategory === sub}
+                className={[
+                  'flex-shrink-0 px-[var(--space-3)] py-[var(--space-1)] rounded-full text-[var(--text-2xs)] font-bold border transition-colors',
+                  activeSubcategory === sub
+                    ? 'border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-primary)]/10'
+                    : 'border-[var(--color-border-medium)] text-[var(--color-text-tertiary)] hover:border-[var(--color-text-muted)]',
+                ].join(' ')}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* ── Main ───────────────────────────────────────────────────────── */}
@@ -84,7 +137,11 @@ export default function Home() {
         <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-5)]">
           {query
             ? `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`
-            : activeCategory === 'Todos' ? 'Destacados' : activeCategory}
+            : activeSubcategory
+              ? activeSubcategory
+              : activeGroup
+                ? currentGroup?.label
+                : 'Destacados'}
         </p>
 
         {filtered.length > 0 ? (

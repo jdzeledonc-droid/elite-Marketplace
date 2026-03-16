@@ -4,7 +4,7 @@ import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import Toast from '../components/ui/Toast'
 import NavBar from '../components/layout/NavBar'
-import { MOCK_USER } from '../lib/mockData'
+import { useAuth } from '../hooks/useAuth'
 
 /**
  * Settings — configuración de cuenta
@@ -12,12 +12,13 @@ import { MOCK_USER } from '../lib/mockData'
  */
 export default function Settings() {
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
   const [toast, setToast] = useState(null)
   const [activeSection, setActiveSection] = useState('account')
 
   const [accountForm, setAccountForm] = useState({
-    name: MOCK_USER.name,
-    email: MOCK_USER.email,
+    name: currentUser?.name ?? '',
+    email: currentUser?.email ?? '',
   })
   const [passwordForm, setPasswordForm] = useState({
     current: '',

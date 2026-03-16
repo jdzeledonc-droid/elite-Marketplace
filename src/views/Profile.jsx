@@ -3,10 +3,11 @@ import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import NavBar from '../components/layout/NavBar'
-import { MOCK_USER } from '../lib/mockData'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Profile() {
   const navigate = useNavigate()
+  const { currentUser, logout } = useAuth()
 
   const MENU_ITEMS = [
     { label: 'Mis pedidos',      icon: '📋', path: '/transactions' },
@@ -28,12 +29,12 @@ export default function Profile() {
       <main className="flex-1 pb-32">
         {/* Profile card */}
         <div className="flex items-center gap-[var(--space-5)] px-[var(--space-6)] py-[var(--space-6)] border-b border-[var(--color-border-light)]">
-          <Avatar src={MOCK_USER.avatar} alt={MOCK_USER.name} size="lg" verified={MOCK_USER.is_verified} />
+          <Avatar src={currentUser.avatar} alt={currentUser.name} size="lg" verified={currentUser.is_verified} />
           <div className="flex-1 min-w-0">
-            <h2 className="text-[var(--text-xl)] font-black text-[var(--color-text-primary)]">{MOCK_USER.name}</h2>
-            <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)] truncate mt-[var(--space-1)]">{MOCK_USER.email}</p>
+            <h2 className="text-[var(--text-xl)] font-black text-[var(--color-text-primary)]">{currentUser.name}</h2>
+            <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)] truncate mt-[var(--space-1)]">{currentUser.email}</p>
             <div className="mt-[var(--space-3)]">
-              <Badge variant="role">{MOCK_USER.user_role === 'buyer' ? 'Comprador' : 'Vendedor'}</Badge>
+              <Badge variant="role">{currentUser.user_role === 'buyer' ? 'Comprador' : 'Vendedor'}</Badge>
             </div>
           </div>
         </div>
@@ -65,7 +66,7 @@ export default function Profile() {
         {/* Logout */}
         <div className="px-[var(--space-6)] pt-[var(--space-6)]">
           <Button variant="destructive" size="lg" className="w-full"
-            onClick={() => navigate('/login')}>
+            onClick={() => { logout(); navigate('/login') }}>
             Cerrar sesión
           </Button>
         </div>

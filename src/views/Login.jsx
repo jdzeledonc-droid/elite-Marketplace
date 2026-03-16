@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import Toast from '../components/ui/Toast'
+import { useAuth } from '../hooks/useAuth'
+import { MOCK_USER } from '../lib/mockData'
 
 /**
  * Login — pantalla de inicio de sesión
@@ -10,6 +12,7 @@ import Toast from '../components/ui/Toast'
  */
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [toast, setToast] = useState(null)
@@ -32,6 +35,7 @@ export default function Login() {
     // Mock — replace with supabase.auth.signInWithPassword()
     await new Promise(r => setTimeout(r, 800))
     setLoading(false)
+    login(MOCK_USER)
     navigate('/')
   }
 
