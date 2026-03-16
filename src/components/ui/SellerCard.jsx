@@ -18,7 +18,10 @@ export default function SellerCard({ seller }) {
   return (
     <article
       onClick={() => navigate(`/seller/${seller.id}`)}
-      className="bg-[var(--color-bg-primary)] border border-[var(--color-border-light)] rounded-[var(--radius-3xl)] overflow-hidden shadow-[var(--shadow-sm)] cursor-pointer active:scale-[0.98] transition-transform"
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') navigate(`/seller/${seller.id}`) }}
+      tabIndex={0}
+      role="button"
+      className="bg-[var(--color-bg-primary)] border border-[var(--color-border-light)] rounded-[var(--radius-3xl)] overflow-hidden shadow-[var(--shadow-sm)] cursor-pointer active:scale-[0.98] transition-transform focus-visible:outline-2 focus-visible:outline-[var(--color-primary)] focus-visible:outline-offset-2"
       aria-label={`Ver perfil de ${seller.name}, ${seller.category}`}
     >
       {/* Cover image / gradient */}

@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
+import { CATEGORY_GROUPS } from '../lib/mockData'
 
-const CATEGORIES = ['UX/UI', 'Marketing', 'Audiovisual']
 const ACCENT_OPTIONS = [
   { key: 'black',  color: '#000000' },
   { key: 'blue',   color: '#3b82f6' },
   { key: 'green',  color: '#10b981' },
   { key: 'red',    color: '#ef4444' },
   { key: 'yellow', color: '#f59e0b' },
+  { key: 'purple', color: '#8b5cf6' },
+  { key: 'orange', color: '#f97316' },
+  { key: 'teal',   color: '#14b8a6' },
+  { key: 'pink',   color: '#ec4899' },
 ]
 const TOTAL_STEPS = 4
 
@@ -17,6 +21,7 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [data, setData] = useState({
+    group: '',
     category: '',
     tagline: '',
     accent: 'black',
@@ -24,9 +29,14 @@ export default function Onboarding() {
   })
   const [errors, setErrors] = useState({})
 
+  const activeGroup = CATEGORY_GROUPS.find(g => g.id === data.group)
+
   function validate() {
     const e = {}
-    if (step === 0 && !data.category) e.category = 'Elige una especialidad'
+    if (step === 0) {
+      if (!data.group) e.group = 'Elige una categoría'
+      else if (!data.category) e.category = 'Elige una especialidad'
+    }
     if (step === 1 && !data.tagline.trim()) e.tagline = 'Escribe tu tagline'
     return e
   }
@@ -77,28 +87,56 @@ export default function Onboarding() {
 
       {/* Step 0 — Especialidad */}
       {step === 0 && (
-        <div className="flex-1 flex flex-col animate-fade-in">
+        <div className="flex-1 flex flex-col animate-fade-in overflow-y-auto">
           <h1 className="text-[var(--text-4xl)] font-black text-[var(--color-text-primary)] leading-tight mb-[var(--space-2)]">
             Tu especialidad
           </h1>
-          <p className="text-[var(--text-base)] text-[var(--color-text-tertiary)] mb-[var(--space-8)]">
+          <p className="text-[var(--text-base)] text-[var(--color-text-tertiary)] mb-[var(--space-5)]">
             Ayuda a los compradores a encontrarte
           </p>
-          <div className="flex flex-col gap-[var(--space-3)]" role="group" aria-label="Categoría">
-            {CATEGORIES.map(cat => (
-              <button key={cat} type="button"
-                onClick={() => { setData(d => ({ ...d, category: cat })); setErrors({}) }}
-                aria-pressed={data.category === cat}
+
+          {/* Level 1 — Groups */}
+          <div className="flex gap-[var(--space-2)] flex-wrap mb-[var(--space-2)]"
+            role="group" aria-label="Categoría principal">
+            {CATEGORY_GROUPS.map(group => (
+              <button key={group.id} type="button"
+                onClick={() => setData(d => ({ ...d, group: group.id, category: '' }))}
+                aria-pressed={data.group === group.id}
                 className={[
-                  'p-[var(--space-6)] rounded-[var(--radius-2xl)] border-2 text-left transition-all active:scale-[0.98]',
-                  data.category === cat
+                  'px-[var(--space-4)] py-[var(--space-2)] rounded-full text-[var(--text-xs)] font-bold border-2 transition-all',
+                  data.group === group.id
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
-                    : 'border-[var(--color-border-light)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]',
+                    : 'border-[var(--color-border-medium)] text-[var(--color-text-secondary)]',
                 ].join(' ')}>
-                <span className="text-[var(--text-lg)] font-bold block">{cat}</span>
+                {group.label}
               </button>
             ))}
           </div>
+          {errors.group && (
+            <p role="alert" className="text-[var(--text-xs)] text-[var(--color-error)] mb-[var(--space-3)]">
+              {errors.group}
+            </p>
+          )}
+
+          {/* Level 2 — Subcategories */}
+          {activeGroup && (
+            <div className="flex flex-col gap-[var(--space-3)] mt-[var(--space-4)]"
+              role="group" aria-label="Especialidad">
+              {activeGroup.subcategories.map(sub => (
+                <button key={sub} type="button"
+                  onClick={() => { setData(d => ({ ...d, category: sub })); setErrors({}) }}
+                  aria-pressed={data.category === sub}
+                  className={[
+                    'p-[var(--space-5)] rounded-[var(--radius-2xl)] border-2 text-left transition-all active:scale-[0.98]',
+                    data.category === sub
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
+                      : 'border-[var(--color-border-light)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]',
+                  ].join(' ')}>
+                  <span className="text-[var(--text-lg)] font-bold block">{sub}</span>
+                </button>
+              ))}
+            </div>
+          )}
           {errors.category && (
             <p role="alert" className="text-[var(--text-xs)] text-[var(--color-error)] mt-[var(--space-3)]">
               {errors.category}

@@ -13,8 +13,10 @@ export default function SellerPanel() {
   const seller = MOCK_SELLERS[0]
   const [activeTab, setActiveTab] = useState('services')
 
+  const BOOTH_TAB_LABEL = { services: 'Servicios', catalog: 'Productos', courses: 'Cursos', hybrid: 'Catálogo' }
+
   const TABS = [
-    { key: 'services', label: 'Servicios' },
+    { key: 'services', label: BOOTH_TAB_LABEL[seller.boothType] ?? 'Servicios' },
     { key: 'leads',    label: 'Leads' },
     { key: 'stats',    label: 'Stats' },
   ]
@@ -72,7 +74,7 @@ export default function SellerPanel() {
           <section id="tabpanel-services" role="tabpanel" aria-label="Mis servicios" className="animate-fade-in">
             <div className="flex items-center justify-between mb-[var(--space-5)]">
               <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
-                {seller.items.length} servicios
+                {seller.items.length} {BOOTH_TAB_LABEL[seller.boothType]?.toLowerCase() ?? 'servicios'}
               </p>
               <Button variant="ghost" size="sm">+ Agregar</Button>
             </div>
