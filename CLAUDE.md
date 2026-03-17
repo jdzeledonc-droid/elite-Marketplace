@@ -30,15 +30,15 @@ Siempre leer este archivo antes de tocar cualquier código.
 ```
 src/
   components/
-    ui/           → Button, Card, Avatar, Badge, Input, Modal, Toast, SearchBar, SellerCard
-    layout/       → NavBar
-  hooks/          → useAuth.jsx (AuthContext + AuthProvider + useAuth)
+    ui/       → Button, Card, Avatar, Badge, Input, Modal, Toast, SearchBar, SellerCard
+    layout/   → NavBar
+  hooks/      → useAuth.jsx (AuthContext + AuthProvider + useAuth)
   lib/
     mockData.js   → MOCK_SELLERS, CATEGORY_GROUPS, ACCENT_COLORS, MOCK_USER
     supabase.js   → stub, activo cuando VITE_MOCK_MODE=false
-  views/          → 12 vistas (Home, Login, Register, Booth, SellerPanel, etc.)
-  index.css       → tokens CSS + Tailwind directives
-App.jsx           → AuthProvider, BrowserRouter, rutas, ProtectedRoute
+  views/      → 12 vistas (Home, Login, Register, Booth, SellerPanel, Onboarding, etc.)
+  index.css   → tokens CSS + Tailwind directives
+App.jsx       → AuthProvider, BrowserRouter, rutas, ProtectedRoute
 ```
 
 ---
@@ -47,25 +47,23 @@ App.jsx           → AuthProvider, BrowserRouter, rutas, ProtectedRoute
 
 - `useAuth()` — expone `{ currentUser, login, logout }`
 - App inicia sin autenticar (`currentUser = null`)
-- NavBar oculta cuando no hay sesión
+- NavBar oculta cuando no hay sesión (`if (!currentUser) return null`)
 - **Rutas públicas:** `/`, `/login`, `/register`, `/seller/:id`
 - **Rutas protegidas:** `/sell`, `/chat`, `/chat/:id`, `/profile`, `/transactions`, `/settings`, `/help`, `/onboarding`
 
 ---
 
-## Datos Mock
-
-### MOCK_SELLERS — campos clave
+## Datos Mock — MOCK_SELLERS campos clave
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
 | `boothType` | `'services' \| 'catalog' \| 'courses' \| 'hybrid'` | Define el template del Booth |
-| `group` | string | ID del grupo de categorías (ej: `'creativos'`) |
-| `category` | string | Subcategoría visible (ej: `'UX/UI'`) |
+| `group` | string | ID del grupo (`'creativos'`, `'educacion'`, etc.) |
+| `category` | string | Subcategoría visible (`'UX/UI'`, `'Alimentos'`, etc.) |
 | `badge` | `'hecho-en-cr' \| 'local' \| null` | Badge especial del vendedor |
-| `accent` | string | Color de acento del vendor (key de `ACCENT_COLORS`) |
-| `cover` | string \| null | URL de imagen de portada del card. Si `null` → gradiente del `accent` |
-| `items[]` | array | Servicios, productos o cursos según `boothType` |
+| `accent` | string | Key de `ACCENT_COLORS` (black/blue/green/red/yellow/purple/orange/teal/pink) |
+| `cover` | string \| null | URL imagen de portada. Si `null` → gradiente del accent |
+| `items[]` | array | Servicios/productos/cursos según `boothType` |
 
 ### CATEGORY_GROUPS — 6 grupos
 `creativos`, `educacion`, `tecnologia`, `moda`, `productos-cr`, `local`
@@ -75,19 +73,26 @@ App.jsx           → AuthProvider, BrowserRouter, rutas, ProtectedRoute
 ## Componentes UI Clave
 
 ### SellerCard
-- Cover image (h-36) o gradiente del accent cuando no hay imagen
-- Badge "Hecho en CR" / "Local" flota sobre el cover
-- Avatar `-mt-9` para efecto de profundidad
-- Para agregar imagen a un seller: `cover: 'url-de-imagen'` en mockData
+- Cover image (h-36) o gradiente accent cuando `seller.cover` es null
+- Badge "Hecho en CR" / "Local" sobre el cover (esquina superior derecha)
+- Avatar `-mt-9` para efecto de profundidad sobre el cover
+- Keyboard accessible: `tabIndex`, `role="button"`, `onKeyDown`, `focus-visible`
 
 ### Badge — variants
 `verified`, `role`, `category`, `success`, `warning`, `error`, `hecho-en-cr`, `local`
 
-### Booth — 4 templates según `boothType`
+### Booth — 4 templates por `boothType`
 - `services` → lista con Contactar
 - `catalog` → grid 2 cols con stock + Pedir
 - `courses` → lista con nivel/duración + Inscribirse
 - `hybrid` → menú/catálogo + sección servicios abajo
+
+### Onboarding — Step 0
+- Grupo chips (nivel 1) → subcategoría buttons (nivel 2) usando `CATEGORY_GROUPS`
+- 9 colores de acento en step 1
+
+### SellerPanel
+- Tab label dinámico: `{ services:'Servicios', catalog:'Productos', courses:'Cursos', hybrid:'Catálogo' }`
 
 ---
 
@@ -95,6 +100,7 @@ App.jsx           → AuthProvider, BrowserRouter, rutas, ProtectedRoute
 
 - **GitHub:** `https://github.com/jdzeledonc-droid/elite-Marketplace`
 - **Vercel (prod):** `https://elite-market-seven.vercel.app`
+- **Auto-deploy:** ✅ activo — cada push a master despliega automáticamente
 - **Figma:** `AP3mfBiEQCRtve451jn06M`
 
 ```bash
@@ -104,21 +110,22 @@ npm run dev -- --host
 # Build
 npm run build
 
-# Push
-git add src/ && git commit -m "mensaje" && git push
+# Push (auto-despliega)
+git add <archivos> && git commit -m "mensaje" && git push
 ```
 
 ---
 
-## Pendiente (Sesión 5)
+## Pendiente — Sesión 6+
 
-- [ ] Onboarding.jsx → usar CATEGORY_GROUPS
-- [ ] SellerPanel.jsx → tab label dinámico por boothType
-- [ ] Imágenes de cover mock para demo visual
-- [ ] WCAG AA audit — contraste + aria-labels
-- [ ] Conectar Vercel auto-deploy con GitHub
+### Fase 5 — Backend (requiere credenciales Supabase)
+- Activar auth real (`supabase.auth.signUp` / `signIn`)
+- Reemplazar mock data con queries reales
+- RLS fixes en `supabase-schema.sql`
 
-## Bloqueado
+### Fase 6 — Figma (requiere plan Professional)
+- Script listo: `elite-market-mvp/create-figma-variables.js`
 
-- Figma Variables API → requiere plan Professional
-- Supabase → sin credenciales
+### Features v2
+- Pagos, notificaciones push, reviews reales, verificación de vendedores
+- Imágenes reales de productos (hoy usan picsum placeholder)
