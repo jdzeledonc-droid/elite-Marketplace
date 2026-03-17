@@ -20,10 +20,10 @@ export default function Profile() {
   return (
     <div className="flex flex-col min-h-dvh bg-[var(--color-bg-primary)]">
       <header className="px-[var(--space-6)] pt-[var(--space-8)] pb-[var(--space-6)] border-b border-[var(--color-border-light)]">
-        <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-1)]">
+        <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-1)]">
           EliteMarket
         </p>
-        <h1 className="text-[var(--text-2xl)] font-black text-[var(--color-text-primary)]">Mi perfil</h1>
+        <h1 className="text-lg font-black text-[var(--color-text-primary)]">Mi perfil</h1>
       </header>
 
       <main className="flex-1 pb-32">
@@ -31,8 +31,8 @@ export default function Profile() {
         <div className="flex items-center gap-[var(--space-5)] px-[var(--space-6)] py-[var(--space-6)] border-b border-[var(--color-border-light)]">
           <Avatar src={currentUser.avatar} alt={currentUser.name} size="lg" verified={currentUser.is_verified} />
           <div className="flex-1 min-w-0">
-            <h2 className="text-[var(--text-xl)] font-black text-[var(--color-text-primary)]">{currentUser.name}</h2>
-            <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)] truncate mt-[var(--space-1)]">{currentUser.email}</p>
+            <h2 className="text-xl font-black text-[var(--color-text-primary)]">{currentUser.name}</h2>
+            <p className="text-sm text-[var(--color-text-tertiary)] truncate mt-[var(--space-1)]">{currentUser.email}</p>
             <div className="mt-[var(--space-3)]">
               <Badge variant="role">{currentUser.user_role === 'buyer' ? 'Comprador' : 'Vendedor'}</Badge>
             </div>
@@ -50,7 +50,7 @@ export default function Profile() {
                   aria-label={item.label}
                 >
                   <span className="text-xl w-6 text-center" aria-hidden="true">{item.icon}</span>
-                  <span className="flex-1 text-left text-[var(--text-base)] font-medium text-[var(--color-text-primary)]">
+                  <span className="flex-1 text-left text-base font-medium text-[var(--color-text-primary)]">
                     {item.label}
                   </span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-[var(--color-text-muted)]" aria-hidden="true">

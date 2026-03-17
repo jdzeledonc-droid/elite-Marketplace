@@ -22,7 +22,7 @@ export default function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-[var(--text-xs)] font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.2em] ml-[var(--space-1)]"
+          className="text-xs font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.2em] ml-[var(--space-1)]"
         >
           {label}
         </label>
@@ -40,12 +40,12 @@ export default function Input({
         className={[
           'w-full bg-[var(--color-bg-primary)] border-2 rounded-[var(--radius-lg)]',
           'px-[var(--space-6)] py-[var(--space-4)]',
-          'text-[var(--text-sm)] font-medium font-[var(--font-family)]',
+          'text-md font-medium font-[var(--font-family)]',
           'shadow-[var(--shadow-sm)] outline-none transition-colors',
           'disabled:opacity-40 disabled:cursor-not-allowed',
           error
             ? 'border-[var(--color-error)] focus:border-[var(--color-error)]'
-            : 'border-[var(--color-border-light)] focus:border-[var(--color-primary)]',
+            : 'border-[var(--color-stroke)] focus:border-[var(--color-primary)]',
         ].join(' ')}
         {...props}
       />
@@ -54,7 +54,7 @@ export default function Input({
         <p
           id={errorId}
           role="alert"
-          className="text-[var(--text-xs)] text-[var(--color-error)] ml-[var(--space-1)]"
+          className="text-xs text-[var(--color-error)] ml-[var(--space-1)]"
         >
           {error}
         </p>

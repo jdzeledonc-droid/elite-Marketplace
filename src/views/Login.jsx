@@ -4,6 +4,7 @@ import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import Toast from '../components/ui/Toast'
 import { useAuth } from '../hooks/useAuth'
+import { isMockMode } from '../lib/supabase'
 import { MOCK_USER } from '../lib/mockData'
 
 /**
@@ -12,7 +13,7 @@ import { MOCK_USER } from '../lib/mockData'
  */
 export default function Login() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, signIn } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [toast, setToast] = useState(null)
@@ -32,11 +33,19 @@ export default function Login() {
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
     setErrors({})
-    // Mock — replace with supabase.auth.signInWithPassword()
-    await new Promise(r => setTimeout(r, 800))
-    setLoading(false)
-    login(MOCK_USER)
-    navigate('/')
+    try {
+      if (isMockMode) {
+        await new Promise(r => setTimeout(r, 800))
+        login(MOCK_USER)
+      } else {
+        await signIn({ email: form.email, password: form.password })
+      }
+      navigate('/')
+    } catch (err) {
+      setToast({ message: err.message ?? 'Error al ingresar', type: 'error' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -47,7 +56,7 @@ export default function Login() {
         <button
           onClick={() => navigate(-1)}
           aria-label="Volver"
-          className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-bg-tertiary)] flex items-center justify-center text-[var(--color-text-secondary)]"
+          className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-bg-tertiary)] border border-[var(--color-stroke)] flex items-center justify-center text-[var(--color-text-secondary)]"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -56,10 +65,10 @@ export default function Login() {
       </div>
 
       <div className="mb-[var(--space-10)]">
-        <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-2)]">
+        <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-2)]">
           Bienvenido
         </p>
-        <h1 className="text-[var(--text-4xl)] font-black text-[var(--color-text-primary)] leading-tight">
+        <h1 className="text-md font-black text-[var(--color-text-primary)] leading-tight">
           Inicia sesión
         </h1>
       </div>
@@ -81,7 +90,7 @@ export default function Login() {
       </form>
 
       <div className="mt-auto pb-[var(--space-10)] pt-[var(--space-8)] text-center">
-        <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)]">
+        <p className="text-sm text-[var(--color-text-tertiary)]">
           ¿No tienes cuenta?{' '}
           <Link to="/register" className="font-bold text-[var(--color-text-primary)] underline underline-offset-2">
             Regístrate

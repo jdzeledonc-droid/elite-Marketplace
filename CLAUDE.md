@@ -18,9 +18,11 @@ Siempre leer este archivo antes de tocar cualquier código.
 ## Reglas de Código
 
 - **Nunca hardcodear** colores, espaciados, radios ni sombras — siempre `var(--*)`
+- **NUNCA usar `text-[var(--text-*)]`** — Tailwind no resuelve CSS vars en clases arbitrarias de fontSize. Usar siempre el token directo: `text-2xs`, `text-xs`, `text-sm`, `text-base`, `text-md`, `text-lg`, `text-xl`, `text-2xl`, etc.
 - **Siempre leer el archivo** antes de editarlo
 - **No crear archivos nuevos** salvo que sea estrictamente necesario
 - **No agregar comentarios** en código que no se modifica
+- **ScrollToTop** ya está en `App.jsx` — no agregar `window.scrollTo` en vistas individuales
 - Idioma del código: **inglés** (variables, funciones, JSX). Texto en UI: **español**
 
 ---
@@ -57,6 +59,7 @@ App.jsx       → AuthProvider, BrowserRouter, rutas, ProtectedRoute
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
+| `title` | string | Claim profesional del seller ("UX Generalist", "Moda Artesanal Tropical"). Focal point del hero y la card |
 | `boothType` | `'services' \| 'catalog' \| 'courses' \| 'hybrid'` | Define el template del Booth |
 | `group` | string | ID del grupo (`'creativos'`, `'educacion'`, etc.) |
 | `category` | string | Subcategoría visible (`'UX/UI'`, `'Alimentos'`, etc.) |
@@ -79,13 +82,17 @@ App.jsx       → AuthProvider, BrowserRouter, rutas, ProtectedRoute
 - Keyboard accessible: `tabIndex`, `role="button"`, `onKeyDown`, `focus-visible`
 
 ### Badge — variants
-`verified`, `role`, `category`, `success`, `warning`, `error`, `hecho-en-cr`, `local`
+`verified`, `role`, `category`, `success`, `warning`, `error`, `hecho-en-cr`, `local`, `level`
+- Todas las variantes: fondo pastel + `text-primary` (#0f172a). Base: `text-2xs leading-[21px] tracking-[3.5px] px-4 py-1`
 
 ### Booth — 4 templates por `boothType`
-- `services` → lista con Contactar
-- `catalog` → grid 2 cols con stock + Pedir
-- `courses` → lista con nivel/duración + Inscribirse
-- `hybrid` → menú/catálogo + sección servicios abajo
+- Hero h-56: `seller.cover` como background + gradient overlay de `accent.bg`
+- Accent color en: CTAs (`AccentButton`), stats values, price chips, border-left cards, section dots
+- `services` → cards con `border-left: 3px solid accent`, price en pill accent, Contactar
+- `catalog` → grid 2 cols, picsum image por item (`seed=item.id`), overlay "Agotado"/"Últimas N!", Pedir
+- `courses` → hero h-56 + container blanco sin overlap (`pt-12`, sin `-mt-*`). Avatar dentro del container, NO con margen negativo. Nivel badge usa `variant="level"`
+- `hybrid` → marca artesanal/emergente: grid productos con precio en image overlay, sección "También ofrecemos" para talleres/encargos con top strip accent. NO restaurantes/delivery
+- Floating button fijo `bottom-[84px] right` con `IconChat` en accent color
 
 ### Onboarding — Step 0
 - Grupo chips (nivel 1) → subcategoría buttons (nivel 2) usando `CATEGORY_GROUPS`
@@ -116,16 +123,22 @@ git add <archivos> && git commit -m "mensaje" && git push
 
 ---
 
-## Pendiente — Sesión 6+
+## Backend — Estado Actual ✅
 
-### Fase 5 — Backend (requiere credenciales Supabase)
-- Activar auth real (`supabase.auth.signUp` / `signIn`)
-- Reemplazar mock data con queries reales
-- RLS fixes en `supabase-schema.sql`
+### Supabase (VITE_MOCK_MODE=false)
+- Auth real activo: `signIn`, `signUp`, `signOut` via `useAuth`
+- Migrations aplicadas:
+  - `001_init_with_fixes.sql` — profiles, leads, transactions + trigger auto-create profile + RLS
+  - `002_sellers.sql` — tabla sellers + RLS + 10 seed sellers
+- `normalizeSeller()` en `supabase.js` — mapea snake_case DB → camelCase app
+- `fetchMySellerProfile(profileId)` — busca seller por `profile_id = auth.uid()`
+- Onboarding guarda seller con `supabase.from('sellers').insert(...)` al finalizar
+- Infiere `booth_type` del grupo: `educacion→courses`, `moda/productos-cr→catalog`, `local→hybrid`, resto→`services`
 
-### Fase 6 — Figma (requiere plan Professional)
+### Pendiente v2
+- Editar servicios (botón "Editar" en SellerPanel no funciona aún)
+- Editar cover/avatar/tagline del seller
+- Leads y transacciones reales
+
+### Fase Figma (requiere plan Professional)
 - Script listo: `elite-market-mvp/create-figma-variables.js`
-
-### Features v2
-- Pagos, notificaciones push, reviews reales, verificación de vendedores
-- Imágenes reales de productos (hoy usan picsum placeholder)

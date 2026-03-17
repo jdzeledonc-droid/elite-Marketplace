@@ -77,12 +77,12 @@ export default function Settings() {
       <header className="px-[var(--space-6)] pt-[var(--space-8)] pb-[var(--space-5)] border-b border-[var(--color-border-light)]">
         <div className="flex items-center gap-[var(--space-3)] mb-[var(--space-5)]">
           <button onClick={() => navigate('/profile')} aria-label="Volver al perfil"
-            className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-bg-tertiary)] flex items-center justify-center text-[var(--color-text-secondary)]">
+            className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-bg-tertiary)] border border-[var(--color-stroke)] flex items-center justify-center text-[var(--color-text-secondary)]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className="text-[var(--text-2xl)] font-black text-[var(--color-text-primary)]">Configuración</h1>
+          <h1 className="text-md font-black text-[var(--color-text-primary)]">Configuración</h1>
         </div>
 
         {/* Section tabs */}
@@ -92,7 +92,7 @@ export default function Settings() {
               aria-selected={activeSection === s.key}
               onClick={() => setActiveSection(s.key)}
               className={[
-                'flex-1 py-[var(--space-2)] rounded-[var(--radius-lg)] text-[var(--text-xs)] font-bold transition-colors',
+                'flex-1 py-[var(--space-2)] rounded-[var(--radius-lg)] text-xs font-bold transition-colors',
                 activeSection === s.key
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-tertiary)]',
@@ -119,11 +119,11 @@ export default function Settings() {
 
             {/* Danger zone */}
             <div className="mt-[var(--space-4)] pt-[var(--space-6)] border-t border-[var(--color-border-light)]">
-              <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-4)]">
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-4)]">
                 Zona peligrosa
               </p>
               <button type="button"
-                className="text-[var(--text-sm)] font-semibold text-[var(--color-error)] underline underline-offset-2">
+                className="text-sm font-semibold text-[var(--color-error)] underline underline-offset-2">
                 Eliminar cuenta
               </button>
             </div>
@@ -167,7 +167,7 @@ export default function Settings() {
         {/* Notifications */}
         {activeSection === 'notifications' && (
           <div className="flex flex-col gap-[var(--space-1)] animate-fade-in">
-            <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-4)]">
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-4)]">
               Preferencias
             </p>
             {[
@@ -183,8 +183,8 @@ export default function Settings() {
                   className="w-full flex items-center justify-between py-[var(--space-5)] text-left"
                 >
                   <div>
-                    <p className="text-[var(--text-base)] font-medium text-[var(--color-text-primary)]">{label}</p>
-                    <p className="text-[var(--text-xs)] text-[var(--color-text-tertiary)] mt-[var(--space-1)]">{desc}</p>
+                    <p className="text-base font-medium text-[var(--color-text-primary)]">{label}</p>
+                    <p className="text-xs text-[var(--color-text-tertiary)] mt-[var(--space-1)]">{desc}</p>
                   </div>
                   {/* Toggle */}
                   <div className={[

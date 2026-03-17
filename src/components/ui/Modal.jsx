@@ -67,7 +67,7 @@ export default function Modal({ isOpen, onClose, title, children, className = ''
         <div className="w-10 h-1 bg-[var(--color-border-medium)] rounded-full mx-auto mb-[var(--space-6)]" aria-hidden="true" />
 
         {title && (
-          <h2 className="text-[var(--text-xl)] font-bold text-[var(--color-text-primary)] mb-[var(--space-6)]">
+          <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-[var(--space-6)]">
             {title}
           </h2>
         )}

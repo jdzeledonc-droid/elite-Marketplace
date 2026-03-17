@@ -54,46 +54,48 @@ export default function SellerCard({ seller }) {
       {/* Content */}
       <div className="px-[var(--space-5)] pt-[var(--space-3)] pb-[var(--space-5)]">
 
-        {/* Avatar + name + rating */}
-        <div className="flex items-start gap-[var(--space-3)]">
+        {/* Avatar row — identidad secundaria */}
+        <div className="flex items-center gap-[var(--space-3)] mb-[var(--space-3)]">
           <div className="-mt-9">
             <Avatar src={seller.avatar} alt={seller.name} size="md" verified={seller.is_verified} />
           </div>
-          <div className="flex-1 min-w-0 pt-[var(--space-1)]">
-            <h3 className="text-[var(--text-md)] font-bold text-[var(--color-text-primary)] truncate">
+          <div className="flex-1 min-w-0">
+            <p className="text-base text-[var(--color-text-primary)] truncate">
               {seller.name}
-            </h3>
+            </p>
             <Badge variant="category" className="mt-[var(--space-1)]">
               {seller.category}
             </Badge>
           </div>
-          <div className="flex items-center gap-[var(--space-1)] pt-[var(--space-2)]">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--color-warning)]" aria-hidden="true">
+          <div className="flex items-center gap-[var(--space-1)] flex-shrink-0">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--color-warning)]" aria-hidden="true">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
-            <span className="text-[var(--text-sm)] font-bold text-[var(--color-text-primary)]">
+            <span className="text-sm font-bold text-[var(--color-text-primary)]">
               {seller.rating}
-            </span>
-            <span className="text-[var(--text-2xs)] text-[var(--color-text-tertiary)]">
-              ({seller.reviews})
             </span>
           </div>
         </div>
 
+        {/* Title — claim principal del seller */}
+        <h3 className="text-lg font-black text-[var(--color-text-primary)] leading-tight mb-[var(--space-2)]">
+          {seller.title || seller.category}
+        </h3>
+
         {/* Tagline */}
-        <p className="mt-[var(--space-3)] text-[var(--text-sm)] text-[var(--color-text-secondary)] leading-relaxed line-clamp-2">
+        <p className="text-base text-[var(--color-text-primary)] leading-relaxed line-clamp-2">
           {seller.tagline}
         </p>
 
         {/* Stats */}
         <div className="flex items-center gap-[var(--space-3)] mt-[var(--space-3)]">
-          <span className="text-[var(--text-xs)] text-[var(--color-text-tertiary)]">
+          <span className="text-base text-[var(--color-text-primary)]">
             {itemsCount} {itemLabel}{itemsCount !== 1 ? 's' : ''}
           </span>
           {seller.items?.[0] && (
             <>
               <span className="text-[var(--color-border-medium)]" aria-hidden="true">·</span>
-              <span className="text-[var(--text-xs)] font-semibold text-[var(--color-text-secondary)]">
+              <span className="text-base font-semibold text-[var(--color-text-primary)]">
                 desde {seller.items[0].price}
               </span>
             </>

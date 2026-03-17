@@ -85,11 +85,11 @@ export default function NavBar() {
                   'flex flex-col items-center gap-[var(--space-1)] px-[var(--space-3)] py-[var(--space-2)] rounded-[var(--radius-md)] transition-colors',
                   isActive
                     ? 'text-[var(--color-primary)]'
-                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-tertiary)]',
+                    : 'text-[var(--color-stroke)] hover:text-[var(--color-text-secondary)]',
                 ].join(' ')}
               >
                 {icon}
-                <span className="text-[var(--text-2xs)] font-semibold">{label}</span>
+                <span className="text-2xs font-semibold">{label}</span>
               </button>
             </li>
           )

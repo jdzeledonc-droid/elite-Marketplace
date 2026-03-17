@@ -1,5 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './hooks/useAuth'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
 
 import Home from './views/Home'
 import Login from './views/Login'
@@ -21,7 +28,9 @@ function ProtectedRoute({ children }) {
 
 function AppRoutes() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       <Route path="/"             element={<Home />} />
       <Route path="/login"        element={<Login />} />
       <Route path="/register"     element={<Register />} />
@@ -36,6 +45,7 @@ function AppRoutes() {
       <Route path="/help"         element={<ProtectedRoute><Help /></ProtectedRoute>} />
       <Route path="*"             element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
 

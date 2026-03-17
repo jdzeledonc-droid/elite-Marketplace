@@ -38,7 +38,7 @@ export default function Toast({ message, type = 'info', onClose, duration = 3500
         <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white/20 text-xs font-bold flex-shrink-0" aria-hidden="true">
           {icons[type]}
         </span>
-        <p className="flex-1 text-[var(--text-sm)] font-medium">{message}</p>
+        <p className="flex-1 text-sm font-medium">{message}</p>
         <button
           onClick={onClose}
           aria-label="Cerrar notificación"

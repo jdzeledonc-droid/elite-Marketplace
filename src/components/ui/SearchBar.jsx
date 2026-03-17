@@ -21,7 +21,7 @@ export default function SearchBar({ value, onChange, placeholder = 'Buscar servi
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
           aria-label="Buscar servicios y vendedores"
-          className="w-full bg-[var(--color-bg-primary)] border-2 border-[var(--color-border-light)] rounded-[var(--radius-4xl)] pl-[var(--space-12)] pr-[var(--space-5)] py-[var(--space-4)] text-[var(--text-sm)] font-medium shadow-[var(--shadow-sm)] outline-none focus:border-[var(--color-primary)] transition-colors"
+          className="w-full bg-[var(--color-bg-primary)] border-2 border-[var(--color-stroke)] rounded-[var(--radius-4xl)] pl-[var(--space-12)] pr-[var(--space-5)] py-[var(--space-4)] text-md font-medium shadow-[var(--shadow-sm)] outline-none focus:border-[var(--color-primary)] transition-colors"
         />
 
         {value && (

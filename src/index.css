@@ -56,6 +56,7 @@
   /* Colors — Borders */
   --color-border-light:   var(--color-slate-100);
   --color-border-medium:  var(--color-slate-200);
+  --color-stroke:         var(--color-slate-400);
 
   /* Colors — Text */
   --color-text-primary:   var(--color-slate-900);

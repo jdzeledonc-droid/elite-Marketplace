@@ -43,22 +43,22 @@ export default function Conversation() {
       {/* Header */}
       <header className="flex items-center gap-[var(--space-3)] px-[var(--space-5)] py-[var(--space-4)] border-b border-[var(--color-border-light)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] flex-shrink-0">
         <button onClick={() => navigate('/chat')} aria-label="Volver a mensajes"
-          className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-bg-tertiary)] flex items-center justify-center text-[var(--color-text-secondary)] flex-shrink-0">
+          className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--color-bg-tertiary)] border border-[var(--color-stroke)] flex items-center justify-center text-[var(--color-text-secondary)] flex-shrink-0">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
         <Avatar src={null} alt={NAMES[id] || 'Usuario'} size="sm" />
         <div className="flex-1 min-w-0">
-          <p className="text-[var(--text-base)] font-bold text-[var(--color-text-primary)] truncate">{NAMES[id] || 'Conversación'}</p>
-          <p className="text-[var(--text-xs)] text-[var(--color-success)]">Disponible</p>
+          <p className="text-base font-bold text-[var(--color-text-primary)] truncate">{NAMES[id] || 'Conversación'}</p>
+          <p className="text-base text-[var(--color-success)]">Disponible</p>
         </div>
       </header>
 
       {/* Messages */}
       <main className="flex-1 overflow-y-auto px-[var(--space-5)] py-[var(--space-5)]" aria-live="polite" aria-label="Conversación">
         {messages.length === 0 ? (
-          <p className="text-center text-[var(--text-sm)] text-[var(--color-text-muted)] mt-8">
+          <p className="text-center text-sm text-[var(--color-text-muted)] mt-8">
             Inicia la conversación
           </p>
         ) : (
@@ -66,13 +66,13 @@ export default function Conversation() {
             {messages.map(msg => (
               <div key={msg.id} className={`flex ${msg.sent ? 'justify-end' : 'justify-start'}`}>
                 <div className={[
-                  'max-w-[80%] px-[var(--space-4)] py-[var(--space-3)] text-[var(--text-base)] leading-relaxed',
+                  'max-w-[80%] px-[var(--space-4)] py-[var(--space-3)] text-base leading-relaxed',
                   msg.sent
                     ? 'bg-[var(--color-primary)] text-white rounded-[var(--radius-chat-bubble)_var(--radius-chat-bubble)_0_var(--radius-chat-bubble)]'
                     : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] rounded-[var(--radius-chat-bubble)_var(--radius-chat-bubble)_var(--radius-chat-bubble)_0]',
                 ].join(' ')}>
                   <p>{msg.text}</p>
-                  <p className={`text-[var(--text-2xs)] mt-[var(--space-1)] ${msg.sent ? 'text-white/50' : 'text-[var(--color-text-muted)]'} text-right`}>
+                  <p className={`text-2xs mt-[var(--space-1)] ${msg.sent ? 'text-white/50' : 'text-[var(--color-text-muted)]'} text-right`}>
                     {msg.time}
                   </p>
                 </div>
@@ -92,7 +92,7 @@ export default function Conversation() {
           onChange={e => setInput(e.target.value)}
           placeholder="Escribe un mensaje..."
           aria-label="Escribe un mensaje"
-          className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-light)] rounded-full px-[var(--space-5)] py-[var(--space-3)] text-[var(--text-sm)] outline-none focus:border-[var(--color-primary)] transition-colors"
+          className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-stroke)] rounded-full px-[var(--space-5)] py-[var(--space-3)] text-sm outline-none focus:border-[var(--color-primary)] transition-colors"
         />
         <button type="submit" aria-label="Enviar mensaje"
           disabled={!input.trim()}

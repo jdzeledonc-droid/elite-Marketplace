@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import Toast from '../components/ui/Toast'
+import { useAuth } from '../hooks/useAuth'
+import { isMockMode } from '../lib/supabase'
 
 const ROLES = [
   { value: 'buyer',  label: 'Comprador', desc: 'Busco servicios digitales' },
@@ -15,6 +17,7 @@ const ROLES = [
  */
 export default function Register() {
   const navigate = useNavigate()
+  const { signUp } = useAuth()
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'buyer' })
   const [errors, setErrors] = useState({})
   const [toast, setToast] = useState(null)
@@ -36,13 +39,17 @@ export default function Register() {
     if (Object.keys(errs).length) { setErrors(errs); return }
     setLoading(true)
     setErrors({})
-    // Mock — replace with supabase.auth.signUp()
-    await new Promise(r => setTimeout(r, 900))
-    setLoading(false)
-    if (form.role === 'seller') {
-      navigate('/onboarding')
-    } else {
-      navigate('/')
+    try {
+      if (isMockMode) {
+        await new Promise(r => setTimeout(r, 900))
+      } else {
+        await signUp({ email: form.email, password: form.password, name: form.name, role: form.role })
+      }
+      navigate(form.role === 'seller' ? '/onboarding' : '/')
+    } catch (err) {
+      setToast({ message: err.message ?? 'Error al registrarse', type: 'error' })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -54,7 +61,7 @@ export default function Register() {
         <button
           onClick={() => navigate(-1)}
           aria-label="Volver"
-          className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-bg-tertiary)] flex items-center justify-center text-[var(--color-text-secondary)]"
+          className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-bg-tertiary)] border border-[var(--color-stroke)] flex items-center justify-center text-[var(--color-text-secondary)]"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -63,17 +70,17 @@ export default function Register() {
       </div>
 
       <div className="mb-[var(--space-8)]">
-        <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-2)]">
+        <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-2)]">
           Nuevo en EliteMarket
         </p>
-        <h1 className="text-[var(--text-4xl)] font-black text-[var(--color-text-primary)] leading-tight">
+        <h1 className="text-base font-black text-[var(--color-text-primary)] leading-tight">
           Crea tu cuenta
         </h1>
       </div>
 
       {/* Role selector — buyer onboarding */}
       <div className="mb-[var(--space-6)]">
-        <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.2em] mb-[var(--space-3)]">
+        <p className="text-xs font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.2em] mb-[var(--space-3)]">
           Soy...
         </p>
         <div className="flex gap-[var(--space-3)]" role="group" aria-label="Tipo de cuenta">
@@ -87,11 +94,11 @@ export default function Register() {
                 'flex-1 flex flex-col items-start p-[var(--space-5)] rounded-[var(--radius-2xl)] border-2 transition-colors text-left',
                 form.role === value
                   ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
-                  : 'border-[var(--color-border-light)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]',
+                  : 'border-[var(--color-stroke)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]',
               ].join(' ')}
             >
-              <span className="font-bold text-[var(--text-md)] mb-[var(--space-1)]">{label}</span>
-              <span className={`text-[var(--text-xs)] ${form.role === value ? 'text-white/70' : 'text-[var(--color-text-tertiary)]'}`}>
+              <span className="font-bold text-md mb-[var(--space-1)]">{label}</span>
+              <span className={`text-md ${form.role === value ? 'text-white/70' : 'text-[var(--color-text-tertiary)]'}`}>
                 {desc}
               </span>
             </button>
@@ -121,7 +128,7 @@ export default function Register() {
       </form>
 
       <div className="mt-auto pb-[var(--space-10)] pt-[var(--space-8)] text-center">
-        <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)]">
+        <p className="text-sm text-[var(--color-text-tertiary)]">
           ¿Ya tienes cuenta?{' '}
           <Link to="/login" className="font-bold text-[var(--color-text-primary)] underline underline-offset-2">
             Inicia sesión

@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/ui/SearchBar'
 import SellerCard from '../components/ui/SellerCard'
 import NavBar from '../components/layout/NavBar'
 import { MOCK_SELLERS, CATEGORY_GROUPS } from '../lib/mockData'
+import { isMockMode, fetchSellers } from '../lib/supabase'
 
 /**
  * Home — exploración y búsqueda de vendedores
@@ -13,14 +14,24 @@ export default function Home() {
   const [query, setQuery] = useState('')
   const [activeGroup, setActiveGroup] = useState(null)
   const [activeSubcategory, setActiveSubcategory] = useState(null)
+  const [sellers, setSellers] = useState(isMockMode ? MOCK_SELLERS : [])
+  const [loadingSellers, setLoadingSellers] = useState(!isMockMode)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isMockMode) return
+    fetchSellers()
+      .then(setSellers)
+      .catch(console.error)
+      .finally(() => setLoadingSellers(false))
+  }, [])
 
   const currentGroup = activeGroup
     ? CATEGORY_GROUPS.find(g => g.id === activeGroup)
     : null
 
   const filtered = useMemo(() => {
-    return MOCK_SELLERS.filter(seller => {
+    return sellers.filter(seller => {
       const matchesGroup = !activeGroup || seller.group === activeGroup
       const matchesSub   = !activeSubcategory || seller.category === activeSubcategory
       const matchesQuery =
@@ -30,7 +41,7 @@ export default function Home() {
         seller.category.toLowerCase().includes(query.toLowerCase())
       return matchesGroup && matchesSub && matchesQuery
     })
-  }, [query, activeGroup, activeSubcategory])
+  }, [query, activeGroup, activeSubcategory, sellers])
 
   function selectGroup(groupId) {
     if (activeGroup === groupId) {
@@ -49,10 +60,10 @@ export default function Home() {
       <header className="sticky top-0 z-[var(--z-overlay)] bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border-b border-[var(--color-border-light)] px-[var(--space-6)] pt-[var(--space-8)] pb-[var(--space-5)]">
         <div className="flex items-center justify-between mb-[var(--space-5)]">
           <div>
-            <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
               EliteMarket
             </p>
-            <h1 className="text-[var(--text-2xl)] font-black text-[var(--color-text-primary)] leading-tight">
+            <h1 className="text-md font-black text-[var(--color-text-primary)] leading-tight">
               Servicios premium
             </h1>
           </div>
@@ -60,7 +71,7 @@ export default function Home() {
           <button
             onClick={() => navigate('/profile')}
             aria-label="Ver perfil"
-            className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-bg-tertiary)] flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)] transition-colors"
+            className="w-10 h-10 rounded-[var(--radius-lg)] bg-[var(--color-bg-tertiary)] border border-[var(--color-stroke)] flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)] transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -81,7 +92,7 @@ export default function Home() {
             onClick={() => { setActiveGroup(null); setActiveSubcategory(null) }}
             aria-pressed={!activeGroup}
             className={[
-              'flex-shrink-0 px-[var(--space-4)] py-[var(--space-2)] rounded-full text-[var(--text-xs)] font-bold transition-colors',
+              'flex-shrink-0 px-[var(--space-4)] py-[var(--space-2)] rounded-full text-xs font-bold transition-colors',
               !activeGroup
                 ? 'bg-[var(--color-primary)] text-white'
                 : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)]',
@@ -95,7 +106,7 @@ export default function Home() {
               onClick={() => selectGroup(group.id)}
               aria-pressed={activeGroup === group.id}
               className={[
-                'flex-shrink-0 px-[var(--space-4)] py-[var(--space-2)] rounded-full text-[var(--text-xs)] font-bold transition-colors',
+                'flex-shrink-0 px-[var(--space-4)] py-[var(--space-2)] rounded-full text-xs font-bold transition-colors',
                 activeGroup === group.id
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)]',
@@ -119,7 +130,7 @@ export default function Home() {
                 onClick={() => setActiveSubcategory(activeSubcategory === sub ? null : sub)}
                 aria-pressed={activeSubcategory === sub}
                 className={[
-                  'flex-shrink-0 px-[var(--space-3)] py-[var(--space-1)] rounded-full text-[var(--text-2xs)] font-bold border transition-colors',
+                  'flex-shrink-0 px-[var(--space-3)] py-[var(--space-1)] rounded-full text-2xs font-bold border transition-colors',
                   activeSubcategory === sub
                     ? 'border-[var(--color-primary)] text-[var(--color-primary)] bg-[var(--color-primary)]/10'
                     : 'border-[var(--color-border-medium)] text-[var(--color-text-tertiary)] hover:border-[var(--color-text-muted)]',
@@ -134,7 +145,13 @@ export default function Home() {
 
       {/* ── Main ───────────────────────────────────────────────────────── */}
       <main className="flex-1 px-[var(--space-5)] py-[var(--space-6)] pb-32">
-        <p className="text-[var(--text-xs)] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-5)]">
+        {loadingSellers && (
+          <div className="flex justify-center py-16">
+            <div className="w-6 h-6 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
+          </div>
+        )}
+        {!loadingSellers && <>
+        <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-5)]">
           {query
             ? `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`
             : activeSubcategory
@@ -160,12 +177,13 @@ export default function Home() {
                 <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </div>
-            <p className="text-[var(--text-md)] font-bold text-[var(--color-text-primary)]">Sin resultados</p>
-            <p className="text-[var(--text-sm)] text-[var(--color-text-tertiary)] mt-[var(--space-2)]">
+            <p className="text-md font-bold text-[var(--color-text-primary)]">Sin resultados</p>
+            <p className="text-sm text-[var(--color-text-tertiary)] mt-[var(--space-2)]">
               Intenta con otro término o categoría
             </p>
           </div>
         )}
+        </>}
       </main>
 
       <NavBar />
