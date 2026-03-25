@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
-import Modal from '../components/ui/Modal'
 import Toast from '../components/ui/Toast'
 import NavBar from '../components/layout/NavBar'
 import { MOCK_MY_SELLER } from '../lib/mockData'
 import { useAuth } from '../hooks/useAuth'
-import { isMockMode, fetchMySellerProfile, updateSellerItems, updateSellerBrand, uploadSellerImage, uploadItemImage, fetchMyLeads } from '../lib/supabase'
+import { isMockMode, fetchMySellerProfile, updateSellerBrand, uploadSellerImage, fetchMyLeads, supabase } from '../lib/supabase'
 
 // Generate a simple unique id for new items
 function newId() {
@@ -24,25 +23,14 @@ function emptyItem(boothType) {
 }
 
 export default function SellerPanel() {
-  const navigate = useNavigate()
-  const { currentUser } = useAuth()
+  const navigate  = useNavigate()
+  const location  = useLocation()
+  const { currentUser, updateCurrentUser } = useAuth()
   const [seller, setSeller] = useState(isMockMode ? MOCK_MY_SELLER : null)
   const [loading, setLoading] = useState(!isMockMode)
   const [activeTab, setActiveTab] = useState('services')
   const [leads, setLeads] = useState([])
   const [leadsLoading, setLeadsLoading] = useState(false)
-
-  // Item modal state
-  const [editingItem, setEditingItem]       = useState(null)   // null = closed, object = editing/adding
-  const [isNewItem, setIsNewItem]           = useState(false)
-  const [itemSaving, setItemSaving]         = useState(false)
-  const [itemImageFile, setItemImageFile]   = useState(null)
-  const [itemImagePreview, setItemImagePreview] = useState(null)
-
-  // Profile modal state
-  const [editingProfile, setEditingProfile] = useState(false)
-  const [profileForm, setProfileForm]       = useState({ title: '', tagline: '', cover_url: '' })
-  const [profileSaving, setProfileSaving]   = useState(false)
 
   const BRAND_ACCENT_OPTIONS = [
     { key: 'black',  color: '#000000' },
@@ -75,6 +63,14 @@ export default function SellerPanel() {
       .then(setSeller)
       .finally(() => setLoading(false))
   }, [currentUser])
+
+  // Receive updated items back from ItemEdit page
+  useEffect(() => {
+    if (location.state?.updatedItems) {
+      setSeller(prev => prev ? { ...prev, items: location.state.updatedItems } : prev)
+      window.history.replaceState({}, '')
+    }
+  }, [location.state])
 
   useEffect(() => {
     if (isMockMode || !currentUser) return
@@ -132,113 +128,11 @@ export default function SellerPanel() {
   // ── Item handlers ─────────────────────────────────────────────────────────
 
   function openAddItem() {
-    setIsNewItem(true)
-    setEditingItem(emptyItem(seller.boothType))
+    navigate('/sell/item/new', { state: { seller } })
   }
 
   function openEditItem(item) {
-    setIsNewItem(false)
-    setEditingItem({ ...item })
-    setItemImageFile(null)
-    setItemImagePreview(null)
-  }
-
-  function closeItemModal() {
-    setEditingItem(null)
-    setIsNewItem(false)
-    if (itemImagePreview) URL.revokeObjectURL(itemImagePreview)
-    setItemImageFile(null)
-    setItemImagePreview(null)
-  }
-
-  function setItemField(field, value) {
-    setEditingItem(prev => ({ ...prev, [field]: value }))
-  }
-
-  function handleItemImageChange(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setItemImagePreview(prev => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(file) })
-    setItemImageFile(file)
-  }
-
-  async function saveItem() {
-    if (!editingItem.title.trim() || !editingItem.price.trim()) return
-    setItemSaving(true)
-
-    let image = editingItem.image ?? null
-    if (itemImageFile) {
-      if (!isMockMode) {
-        try { image = await uploadItemImage(currentUser.id, editingItem.id, itemImageFile) } catch (_) { /* silent */ }
-      } else {
-        image = itemImagePreview
-      }
-    }
-
-    const itemWithImage = { ...editingItem, image }
-    let newItems
-    if (isNewItem) {
-      newItems = [...seller.items, itemWithImage]
-    } else {
-      newItems = seller.items.map(i => i.id === editingItem.id ? itemWithImage : i)
-    }
-
-    setSeller(prev => ({ ...prev, items: newItems }))
-    closeItemModal()
-
-    if (!isMockMode) {
-      try { await updateSellerItems(seller.id, newItems) } catch (_) { /* silent */ }
-    }
-    setItemSaving(false)
-  }
-
-  async function deleteItem() {
-    const newItems = seller.items.filter(i => i.id !== editingItem.id)
-    setSeller(prev => ({ ...prev, items: newItems }))
-    closeItemModal()
-
-    if (!isMockMode) {
-      try { await updateSellerItems(seller.id, newItems) } catch (_) { /* silent */ }
-    }
-  }
-
-  // ── Profile handlers ──────────────────────────────────────────────────────
-
-  function openEditProfile() {
-    setProfileForm({
-      title:     seller.title     ?? '',
-      tagline:   seller.tagline   ?? '',
-      cover_url: seller.cover     ?? '',
-    })
-    setEditingProfile(true)
-  }
-
-  function setProfileField(field, value) {
-    setProfileForm(prev => ({ ...prev, [field]: value }))
-  }
-
-  async function saveProfile() {
-    if (!profileForm.title.trim()) return
-    setProfileSaving(true)
-
-    setSeller(prev => ({
-      ...prev,
-      title:   profileForm.title,
-      tagline: profileForm.tagline,
-      cover:   profileForm.cover_url || null,
-    }))
-    setEditingProfile(false)
-
-    if (!isMockMode) {
-      try {
-        await updateSellerBrand(seller.id, {
-          title:     profileForm.title,
-          tagline:   profileForm.tagline,
-          cover_url: profileForm.cover_url,
-        })
-      } catch (_) { /* silent */ }
-    }
-    setProfileSaving(false)
+    navigate(`/sell/item/${item.id}`, { state: { seller, item } })
   }
 
   // ── Brand handlers ─────────────────────────────────────────────────────────
@@ -304,6 +198,10 @@ export default function SellerPanel() {
           cover_url,
           accent:       brandForm.accent,
         })
+        // Keep user profile avatar in sync
+        if (avatar_url && avatar_url !== (seller.avatar ?? null)) {
+          try { await supabase.from('profiles').update({ avatar_url }).eq('id', currentUser.id) } catch (_) {}
+        }
       }
 
       setSeller(prev => ({
@@ -318,6 +216,10 @@ export default function SellerPanel() {
         avatar:      avatar_url,
         cover:       cover_url,
       }))
+      // Reflect new avatar across the whole app
+      if (avatar_url !== (seller.avatar ?? null)) {
+        updateCurrentUser({ avatar: avatar_url })
+      }
       setBrandAvatarFile(null)
       setBrandCoverFile(null)
       setBrandAvatarPreview(null)
@@ -374,7 +276,7 @@ export default function SellerPanel() {
               Mi Marca
             </Button>
             <Button variant="secondary" size="sm"
-              onClick={() => seller && navigate(`/seller/${seller.id}`)}
+              onClick={() => seller && navigate(`/seller/${seller.id}`, { state: { seller } })}
               disabled={!seller} aria-label="Ver mi tienda pública">
               Ver mi tienda
             </Button>
@@ -666,146 +568,6 @@ export default function SellerPanel() {
       <NavBar />
 
       <Toast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
-
-      {/* ── Item modal ──────────────────────────────────────────────────────── */}
-      <Modal
-        isOpen={editingItem !== null}
-        onClose={closeItemModal}
-        title={isNewItem ? `Agregar ${BOOTH_TAB_LABEL[seller.boothType]?.slice(0, -1).toLowerCase() ?? 'servicio'}` : 'Editar'}
-      >
-        {editingItem && (
-          <div className="flex flex-col gap-[var(--space-5)]">
-            <Input
-              label="Título"
-              value={editingItem.title}
-              onChange={e => setItemField('title', e.target.value)}
-              placeholder={isCatalog ? 'Ej: Blusa Bordada Tropical' : isCourses ? 'Ej: Diseño Gráfico Básico' : 'Ej: Diseño de App Móvil'}
-            />
-            <Input
-              label="Precio"
-              value={editingItem.price}
-              onChange={e => setItemField('price', e.target.value)}
-              placeholder={isCatalog ? 'Ej: ₡18,000' : 'Ej: Desde $800 USD'}
-            />
-            {isServices && (
-              <Input
-                label="Entrega"
-                value={editingItem.delivery ?? ''}
-                onChange={e => setItemField('delivery', e.target.value)}
-                placeholder="Ej: 7 días"
-              />
-            )}
-            {isCatalog && (
-              <Input
-                label="Stock"
-                type="number"
-                value={editingItem.stock ?? ''}
-                onChange={e => setItemField('stock', e.target.value)}
-                placeholder="Ej: 10"
-              />
-            )}
-            {isCourses && (
-              <>
-                <Input
-                  label="Duración"
-                  value={editingItem.duration ?? ''}
-                  onChange={e => setItemField('duration', e.target.value)}
-                  placeholder="Ej: 8 horas"
-                />
-                <Input
-                  label="Nivel"
-                  value={editingItem.level ?? ''}
-                  onChange={e => setItemField('level', e.target.value)}
-                  placeholder="Ej: Principiante"
-                />
-              </>
-            )}
-
-            {/* Imagen opcional */}
-            <div>
-              <p className="text-xs font-semibold text-[var(--color-text-secondary)] mb-[var(--space-2)] ml-[var(--space-1)]">
-                Imagen (opcional)
-              </p>
-              <label className="cursor-pointer block" aria-label="Subir imagen">
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
-                  onChange={handleItemImageChange} />
-                <div className="relative h-28 rounded-[var(--radius-xl)] overflow-hidden bg-[var(--color-bg-tertiary)] border-2 border-dashed border-[var(--color-border-medium)] flex items-center justify-center">
-                  {(itemImagePreview || editingItem.image) ? (
-                    <img src={itemImagePreview ?? editingItem.image} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="flex flex-col items-center gap-[var(--space-2)]">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"
-                          stroke="var(--color-text-muted)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <p className="text-xs text-[var(--color-text-muted)]">Toca para subir imagen</p>
-                    </div>
-                  )}
-                  {(itemImagePreview || editingItem.image) && (
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <p className="text-white text-xs font-bold">Cambiar imagen</p>
-                    </div>
-                  )}
-                </div>
-              </label>
-            </div>
-
-            <Button
-              variant="primary"
-              className="w-full"
-              onClick={saveItem}
-              disabled={itemSaving || !editingItem.title.trim() || !editingItem.price.trim()}
-            >
-              {itemSaving ? 'Guardando…' : 'Guardar'}
-            </Button>
-
-            {!isNewItem && (
-              <button
-                onClick={deleteItem}
-                className="w-full py-[var(--space-3)] text-sm font-bold text-[var(--color-error)] hover:opacity-70 transition-opacity"
-              >
-                Eliminar
-              </button>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      {/* ── Profile modal ───────────────────────────────────────────────────── */}
-      <Modal
-        isOpen={editingProfile}
-        onClose={() => setEditingProfile(false)}
-        title="Editar perfil"
-      >
-        <div className="flex flex-col gap-[var(--space-5)]">
-          <Input
-            label="Claim profesional"
-            value={profileForm.title}
-            onChange={e => setProfileField('title', e.target.value)}
-            placeholder="Ej: UX Generalist"
-          />
-          <Input
-            label="Tagline"
-            value={profileForm.tagline}
-            onChange={e => setProfileField('tagline', e.target.value)}
-            placeholder="Ej: Diseño que convierte visitantes en clientes"
-          />
-          <Input
-            label="URL de portada"
-            value={profileForm.cover_url}
-            onChange={e => setProfileField('cover_url', e.target.value)}
-            placeholder="https://…  (vacío = gradiente automático)"
-          />
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={saveProfile}
-            disabled={profileSaving || !profileForm.title.trim()}
-          >
-            {profileSaving ? 'Guardando…' : 'Guardar'}
-          </Button>
-        </div>
-      </Modal>
 
     </div>
   )

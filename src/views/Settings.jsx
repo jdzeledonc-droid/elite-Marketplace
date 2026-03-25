@@ -13,7 +13,7 @@ import { supabase, isMockMode } from '../lib/supabase'
  */
 export default function Settings() {
   const navigate = useNavigate()
-  const { currentUser } = useAuth()
+  const { currentUser, updateCurrentUser } = useAuth()
   const [toast, setToast] = useState(null)
   const [activeSection, setActiveSection] = useState('account')
 
@@ -46,9 +46,9 @@ export default function Settings() {
     setSaving(true)
     try {
       if (!isMockMode) {
-        const updates = {}
         if (accountForm.name !== currentUser.name) {
           await supabase.from('profiles').update({ full_name: accountForm.name }).eq('id', currentUser.id)
+          updateCurrentUser({ name: accountForm.name })
         }
         if (accountForm.email !== currentUser.email) {
           const { error } = await supabase.auth.updateUser({ email: accountForm.email })
@@ -57,9 +57,9 @@ export default function Settings() {
           setToast({ message: 'Revisa tu nuevo correo para confirmar el cambio', type: 'success' })
           return
         }
-        void updates
       } else {
         await new Promise(r => setTimeout(r, 500))
+        updateCurrentUser({ name: accountForm.name })
       }
       setToast({ message: 'Cambios guardados', type: 'success' })
     } catch (err) {
