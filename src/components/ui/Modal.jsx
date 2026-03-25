@@ -7,8 +7,10 @@ import { useEffect, useRef } from 'react'
 export default function Modal({ isOpen, onClose, title, children, className = '' }) {
   const overlayRef = useRef(null)
   const firstFocusRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose })
 
-  // Focus trap + Escape key
+  // Focus trap + Escape key — only re-runs when isOpen changes, not on every parent re-render
   useEffect(() => {
     if (!isOpen) return
 
@@ -16,7 +18,7 @@ export default function Modal({ isOpen, onClose, title, children, className = ''
     firstFocusRef.current?.focus()
 
     function handleKeyDown(e) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
       if (e.key !== 'Tab') return
 
       const focusable = overlayRef.current?.querySelectorAll(
@@ -39,7 +41,7 @@ export default function Modal({ isOpen, onClose, title, children, className = ''
       document.removeEventListener('keydown', handleKeyDown)
       previousFocus?.focus()
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -61,7 +63,7 @@ export default function Modal({ isOpen, onClose, title, children, className = ''
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`relative z-10 w-full max-w-[430px] bg-[var(--color-bg-primary)] rounded-[var(--radius-3xl)_var(--radius-3xl)_0_0] p-[var(--space-8)] shadow-[var(--shadow-xl)] animate-fade-in ${className}`}
+        className={`relative z-10 w-full max-w-[430px] max-h-[85dvh] overflow-y-auto bg-[var(--color-bg-primary)] rounded-[var(--radius-3xl)_var(--radius-3xl)_0_0] p-[var(--space-8)] shadow-[var(--shadow-xl)] animate-fade-in ${className}`}
       >
         {/* Drag handle */}
         <div className="w-10 h-1 bg-[var(--color-border-medium)] rounded-full mx-auto mb-[var(--space-6)]" aria-hidden="true" />

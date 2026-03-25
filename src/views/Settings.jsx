@@ -5,6 +5,7 @@ import Button from '../components/ui/Button'
 import Toast from '../components/ui/Toast'
 import NavBar from '../components/layout/NavBar'
 import { useAuth } from '../hooks/useAuth'
+import { supabase, isMockMode } from '../lib/supabase'
 
 /**
  * Settings — configuración de cuenta
@@ -43,9 +44,29 @@ export default function Settings() {
   async function saveAccount(e) {
     e.preventDefault()
     setSaving(true)
-    await new Promise(r => setTimeout(r, 700))
-    setSaving(false)
-    setToast({ message: 'Cambios guardados', type: 'success' })
+    try {
+      if (!isMockMode) {
+        const updates = {}
+        if (accountForm.name !== currentUser.name) {
+          await supabase.from('profiles').update({ full_name: accountForm.name }).eq('id', currentUser.id)
+        }
+        if (accountForm.email !== currentUser.email) {
+          const { error } = await supabase.auth.updateUser({ email: accountForm.email })
+          if (error) throw error
+          setSaving(false)
+          setToast({ message: 'Revisa tu nuevo correo para confirmar el cambio', type: 'success' })
+          return
+        }
+        void updates
+      } else {
+        await new Promise(r => setTimeout(r, 500))
+      }
+      setToast({ message: 'Cambios guardados', type: 'success' })
+    } catch (err) {
+      setToast({ message: err.message ?? 'Error al guardar', type: 'error' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   function validatePassword() {
@@ -63,10 +84,20 @@ export default function Settings() {
     if (Object.keys(errs).length) { setPasswordErrors(errs); return }
     setPasswordErrors({})
     setSaving(true)
-    await new Promise(r => setTimeout(r, 700))
-    setSaving(false)
-    setPasswordForm({ current: '', next: '', confirm: '' })
-    setToast({ message: 'Contraseña actualizada', type: 'success' })
+    try {
+      if (!isMockMode) {
+        const { error } = await supabase.auth.updateUser({ password: passwordForm.next })
+        if (error) throw error
+      } else {
+        await new Promise(r => setTimeout(r, 500))
+      }
+      setPasswordForm({ current: '', next: '', confirm: '' })
+      setToast({ message: 'Contraseña actualizada', type: 'success' })
+    } catch (err) {
+      setToast({ message: err.message ?? 'Error al actualizar contraseña', type: 'error' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

@@ -20,6 +20,7 @@ import Profile from './views/Profile'
 import Transactions from './views/Transactions'
 import Settings from './views/Settings'
 import Help from './views/Help'
+import ResetPassword from './views/ResetPassword'
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth()
@@ -34,7 +35,8 @@ function AppRoutes() {
       <Route path="/"             element={<Home />} />
       <Route path="/login"        element={<Login />} />
       <Route path="/register"     element={<Register />} />
-      <Route path="/seller/:id"   element={<Booth />} />
+      <Route path="/seller/:id"      element={<Booth />} />
+      <Route path="/reset-password"  element={<ResetPassword />} />
       <Route path="/onboarding"   element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
       <Route path="/sell"         element={<ProtectedRoute><SellerPanel /></ProtectedRoute>} />
       <Route path="/chat"         element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
