@@ -11,17 +11,27 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (isMockMode) return
 
+    // Safety net: if Supabase never responds, unblock the app after 6s
+    const timeout = setTimeout(() => setLoading(false), 6000)
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(timeout)
       if (session?.user) loadProfile(session.user)
       else setLoading(false)
-    }).catch(() => setLoading(false))
+    }).catch(() => { clearTimeout(timeout); setLoading(false) })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) loadProfile(session.user)
-      else { setCurrentUser(null); setLoading(false) }
-    })
+    let subscription = null
+    try {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) loadProfile(session.user)
+        else { setCurrentUser(null); setLoading(false) }
+      })
+      subscription = data.subscription
+    } catch (_) {
+      setLoading(false)
+    }
 
-    return () => subscription.unsubscribe()
+    return () => { clearTimeout(timeout); subscription?.unsubscribe() }
   }, [])
 
   async function loadProfile(authUser) {

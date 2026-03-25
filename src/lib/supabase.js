@@ -3,9 +3,13 @@ import { createClient } from '@supabase/supabase-js'
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null
+let _supabase = null
+try {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  }
+} catch (_) {}
+export const supabase = _supabase
 
 export const isMockMode = import.meta.env.VITE_MOCK_MODE === 'true' || !supabase
 
