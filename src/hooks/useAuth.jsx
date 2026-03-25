@@ -49,6 +49,10 @@ export function AuthProvider({ children }) {
     setCurrentUser(null)
   }
 
+  function updateCurrentUser(updates) {
+    setCurrentUser(prev => prev ? { ...prev, ...updates } : prev)
+  }
+
   // ── Real auth ────────────────────────────────────────────────
   async function signIn({ email, password }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
@@ -67,7 +71,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading, login, logout, signIn, signUp }}>
+    <AuthContext.Provider value={{ currentUser, loading, login, logout, signIn, signUp, updateCurrentUser }}>
       {loading ? null : children}
     </AuthContext.Provider>
   )
