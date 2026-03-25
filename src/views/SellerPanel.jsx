@@ -8,7 +8,7 @@ import Modal from '../components/ui/Modal'
 import NavBar from '../components/layout/NavBar'
 import { MOCK_SELLERS } from '../lib/mockData'
 import { useAuth } from '../hooks/useAuth'
-import { isMockMode, fetchMySellerProfile, updateSellerItems, updateSellerProfile, fetchMyLeads } from '../lib/supabase'
+import { isMockMode, fetchMySellerProfile, updateSellerItems, updateSellerBrand, fetchMyLeads } from '../lib/supabase'
 
 // Generate a simple unique id for new items
 function newId() {
@@ -155,7 +155,7 @@ export default function SellerPanel() {
     setEditingProfile(false)
 
     if (!isMockMode) {
-      try { await updateSellerProfile(seller.id, profileForm) } catch (_) { /* silent */ }
+      try { await updateSellerBrand(seller.id, profileForm) } catch (_) { /* silent */ }
     }
     setProfileSaving(false)
   }

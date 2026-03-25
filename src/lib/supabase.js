@@ -27,8 +27,12 @@ function normalizeSeller(row) {
     rating:      row.rating,
     reviews:     row.reviews_count,
     is_verified: row.is_verified,
-    items:       row.items   ?? [],
-    services:    row.services ?? [],
+    items:       row.items       ?? [],
+    services:    row.services    ?? [],
+    bio:         row.bio         ?? null,
+    location:    row.location    ?? null,
+    socialLinks: row.social_links ?? {},
+    keywords:    row.keywords    ?? [],
   }
 }
 
@@ -70,10 +74,28 @@ export async function updateSellerItems(sellerId, items) {
   if (error) throw error
 }
 
-export async function updateSellerProfile(sellerId, { title, tagline, cover_url }) {
+export async function uploadSellerImage(profileId, file, type) {
+  const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
+  const MAX_SIZE = 5 * 1024 * 1024
+  if (!ACCEPTED.includes(file.type)) throw new Error('Formato no permitido. Usa JPG, PNG o WebP.')
+  if (file.size > MAX_SIZE) throw new Error('La imagen es muy grande. Máximo 5 MB.')
+  const ext = file.name.split('.').pop().toLowerCase() || 'jpg'
+  const path = `${type}s/${profileId}/${type}.${ext}`
+  const { error: uploadError } = await supabase.storage
+    .from('seller-media')
+    .upload(path, file, { upsert: true, contentType: file.type })
+  if (uploadError) throw uploadError
+  const { data } = supabase.storage.from('seller-media').getPublicUrl(path)
+  return data.publicUrl
+}
+
+export async function updateSellerBrand(sellerId, {
+  title, tagline, bio, location, social_links, keywords,
+  avatar_url, cover_url, accent,
+}) {
   const { error } = await supabase
     .from('sellers')
-    .update({ title, tagline, cover_url })
+    .update({ title, tagline, bio, location, social_links, keywords, avatar_url, cover_url, accent })
     .eq('id', sellerId)
   if (error) throw error
 }
