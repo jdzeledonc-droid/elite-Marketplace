@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) loadProfile(session.user)
       else setLoading(false)
-    })
+    }).catch(() => setLoading(false))
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) loadProfile(session.user)
@@ -25,21 +25,26 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function loadProfile(authUser) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name, avatar_url, user_role, is_verified')
-      .eq('id', authUser.id)
-      .single()
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url, user_role, is_verified')
+        .eq('id', authUser.id)
+        .single()
 
-    setCurrentUser({
-      id:          authUser.id,
-      email:       authUser.email,
-      name:        profile?.full_name  ?? authUser.email,
-      avatar:      profile?.avatar_url ?? null,
-      user_role:   profile?.user_role  ?? 'buyer',
-      is_verified: profile?.is_verified ?? false,
-    })
-    setLoading(false)
+      setCurrentUser({
+        id:          authUser.id,
+        email:       authUser.email,
+        name:        profile?.full_name  ?? authUser.email,
+        avatar:      profile?.avatar_url ?? null,
+        user_role:   profile?.user_role  ?? 'buyer',
+        is_verified: profile?.is_verified ?? false,
+      })
+    } catch (_) {
+      setCurrentUser({ id: authUser.id, email: authUser.email, name: authUser.email, avatar: null, user_role: 'buyer', is_verified: false })
+    } finally {
+      setLoading(false)
+    }
   }
 
   // ── Mock helpers (VITE_MOCK_MODE=true) ──────────────────────
