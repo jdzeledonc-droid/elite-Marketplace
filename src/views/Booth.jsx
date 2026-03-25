@@ -54,6 +54,79 @@ const IcoUsers = ({ s = 11 }) => (
   </svg>
 )
 
+/* ── Social link icons ──────────────────────────────────────────────────── */
+const IcoInstagram = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.8"/>
+    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8"/>
+    <circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>
+  </svg>
+)
+const IcoWhatsApp = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="1.8"/>
+  </svg>
+)
+const IcoFacebook = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+  </svg>
+)
+const IcoTikTok = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+const IcoGlobe = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8"/>
+    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="1.8"/>
+  </svg>
+)
+
+/* ── Brand section (bio + location + social links) ──────────────────────── */
+function BrandSection({ seller, dark = false }) {
+  const links = seller.socialLinks ?? {}
+  const textColor = dark ? 'rgba(255,255,255,0.55)' : 'var(--color-text-secondary)'
+  const iconColor = dark ? 'rgba(255,255,255,0.6)' : 'var(--color-text-muted)'
+
+  const socialEntries = [
+    links.instagram && { href: `https://instagram.com/${links.instagram.replace('@', '')}`, icon: <IcoInstagram />, label: 'Instagram' },
+    links.whatsapp  && { href: `https://wa.me/${links.whatsapp.replace(/[^0-9]/g, '')}`,    icon: <IcoWhatsApp />,  label: 'WhatsApp'  },
+    links.facebook  && { href: links.facebook.startsWith('http') ? links.facebook : `https://facebook.com/${links.facebook}`, icon: <IcoFacebook />, label: 'Facebook' },
+    links.tiktok    && { href: `https://tiktok.com/${links.tiktok.startsWith('@') ? links.tiktok : '@' + links.tiktok}`, icon: <IcoTikTok />, label: 'TikTok' },
+    links.website   && { href: links.website, icon: <IcoGlobe />, label: 'Sitio web' },
+  ].filter(Boolean)
+
+  if (!seller.bio && !seller.location && !socialEntries.length) return null
+
+  return (
+    <div className="mb-[var(--space-6)]">
+      {seller.bio && (
+        <p className="text-base leading-relaxed mb-[var(--space-3)]" style={{ color: textColor }}>
+          {seller.bio}
+        </p>
+      )}
+      {seller.location && (
+        <p className="text-xs font-semibold mb-[var(--space-4)]" style={{ color: textColor }}>
+          📍 {seller.location}
+        </p>
+      )}
+      {socialEntries.length > 0 && (
+        <div className="flex gap-[var(--space-5)]" aria-label="Redes sociales">
+          {socialEntries.map(({ href, icon, label }) => (
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer"
+              aria-label={label} style={{ color: iconColor }}
+              className="hover:opacity-70 transition-opacity">
+              {icon}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── Shared back button ─────────────────────────────────────────────────── */
 function BackBtn({ onClick, dark = false }) {
   return (
@@ -169,11 +242,13 @@ function ServicesBooth({ seller, accent, navigate }) {
         </p>
 
         {/* Badges row */}
-        <div className="flex gap-[var(--space-2)] flex-wrap mb-[var(--space-8)]">
+        <div className="flex gap-[var(--space-2)] flex-wrap mb-[var(--space-5)]">
           {seller.is_verified && <Badge variant="verified">Verificado</Badge>}
           {seller.badge === 'local' && <Badge variant="local">📍 Local</Badge>}
           {seller.badge === 'hecho-en-cr' && <Badge variant="hecho-en-cr">🇨🇷 Hecho en CR</Badge>}
         </div>
+
+        <BrandSection seller={seller} dark />
 
         {/* Section divider */}
         <div className="flex items-center gap-[var(--space-3)] mb-[var(--space-6)]">
@@ -333,6 +408,8 @@ function CatalogBooth({ seller, accent, navigate }) {
       </div>
 
       <div className="flex-1 px-[var(--space-5)] pt-[var(--space-6)] pb-32">
+
+        <BrandSection seller={seller} />
 
         {/* Featured product — full-width banner card */}
         {featured && (
@@ -499,6 +576,8 @@ function CoursesBooth({ seller, accent, navigate }) {
           {seller.tagline}
         </p>
 
+        <BrandSection seller={seller} />
+
         {/* "Lo que aprenderás" checklist */}
         <div
           className="rounded-[var(--radius-2xl)] p-[var(--space-5)] mb-[var(--space-8)]"
@@ -663,6 +742,10 @@ function HybridBooth({ seller, accent, navigate }) {
       </div>
 
       <div className="flex-1 pb-32">
+
+        <div className="px-[var(--space-5)] pt-[var(--space-6)]">
+          <BrandSection seller={seller} />
+        </div>
 
         {/* ── Colección / Productos ── */}
         <div className="px-[var(--space-5)] pt-[var(--space-6)]">
