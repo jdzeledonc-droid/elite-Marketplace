@@ -95,7 +95,7 @@ function BrandSection({ seller, dark = false }) {
     links.whatsapp  && { href: `https://wa.me/${links.whatsapp.replace(/[^0-9]/g, '')}`,    icon: <IcoWhatsApp />,  label: 'WhatsApp'  },
     links.facebook  && { href: links.facebook.startsWith('http') ? links.facebook : `https://facebook.com/${links.facebook}`, icon: <IcoFacebook />, label: 'Facebook' },
     links.tiktok    && { href: `https://tiktok.com/${links.tiktok.startsWith('@') ? links.tiktok : '@' + links.tiktok}`, icon: <IcoTikTok />, label: 'TikTok' },
-    links.website   && { href: links.website, icon: <IcoGlobe />, label: 'Sitio web' },
+    links.website && links.website.startsWith('http') && { href: links.website, icon: <IcoGlobe />, label: 'Sitio web' },
   ].filter(Boolean)
 
   if (!seller.bio && !seller.location && !socialEntries.length) return null
