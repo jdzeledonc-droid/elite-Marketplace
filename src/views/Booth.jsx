@@ -4,7 +4,7 @@ import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import NavBar from '../components/layout/NavBar'
-import { MOCK_SELLERS, ACCENT_COLORS } from '../lib/mockData'
+import { MOCK_SELLERS, MOCK_MY_SELLER, ACCENT_COLORS } from '../lib/mockData'
 import { isMockMode, fetchSeller } from '../lib/supabase'
 
 /* ── Shared icons ───────────────────────────────────────────────────────── */
@@ -267,7 +267,7 @@ function ServicesBooth({ seller, accent, navigate }) {
           >
             <div className="relative h-28 overflow-hidden">
               <img
-                src={`https://picsum.photos/seed/feat-${seller.items[0].id}/600/200`}
+                src={seller.items[0].image ?? `https://picsum.photos/seed/feat-${seller.items[0].id}/600/200`}
                 alt="" aria-hidden
                 className="w-full h-full object-cover opacity-50"
                 loading="lazy"
@@ -420,7 +420,7 @@ function CatalogBooth({ seller, accent, navigate }) {
             <article className="rounded-[32px] overflow-hidden border border-[var(--color-border-light)] shadow-[var(--shadow-md)]">
               <div className="relative h-44 overflow-hidden">
                 <img
-                  src={`https://picsum.photos/seed/${featured.id}/600/300`}
+                  src={featured.image ?? `https://picsum.photos/seed/${featured.id}/600/300`}
                   alt={featured.title}
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -472,7 +472,7 @@ function CatalogBooth({ seller, accent, navigate }) {
                   >
                     <div className="relative h-[187px] overflow-hidden">
                       <img
-                        src={`https://picsum.photos/seed/${item.id}/300/300`}
+                        src={item.image ?? `https://picsum.photos/seed/${item.id}/300/300`}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -619,7 +619,7 @@ function CoursesBooth({ seller, accent, navigate }) {
                   {/* Thumbnail */}
                   <div className="relative w-24 flex-shrink-0 overflow-hidden">
                     <img
-                      src={`https://picsum.photos/seed/course-${item.id}/200/200`}
+                      src={item.image ?? `https://picsum.photos/seed/course-${item.id}/200/200`}
                       alt="" aria-hidden
                       className="w-full h-full object-cover"
                       loading="lazy"
@@ -767,7 +767,7 @@ function HybridBooth({ seller, accent, navigate }) {
                 >
                   <div className="relative h-[187px] overflow-hidden">
                     <img
-                      src={`https://picsum.photos/seed/${item.id}/400/400`}
+                      src={item.image ?? `https://picsum.photos/seed/${item.id}/400/400`}
                       alt={item.title}
                       className="w-full h-full object-cover"
                       loading="lazy"
@@ -876,7 +876,8 @@ function HybridBooth({ seller, accent, navigate }) {
 export default function Booth() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [seller, setSeller] = useState(isMockMode ? (MOCK_SELLERS.find(s => s.id === id) ?? null) : null)
+  const allMockSellers = [...MOCK_SELLERS, MOCK_MY_SELLER]
+  const [seller, setSeller] = useState(isMockMode ? (allMockSellers.find(s => s.id === id) ?? null) : null)
   const [loading, setLoading] = useState(!isMockMode)
   const [notFound, setNotFound] = useState(false)
 

@@ -75,6 +75,7 @@ export async function updateSellerItems(sellerId, items) {
 }
 
 export async function uploadSellerImage(profileId, file, type) {
+  if (!supabase) throw new Error('Supabase client not initialized.')
   const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
   const MAX_SIZE = 5 * 1024 * 1024
   if (!ACCEPTED.includes(file.type)) throw new Error('Formato no permitido. Usa JPG, PNG o WebP.')
@@ -85,6 +86,22 @@ export async function uploadSellerImage(profileId, file, type) {
     .from('seller-media')
     .upload(path, file, { upsert: true, contentType: file.type })
   if (uploadError) throw uploadError
+  const { data } = supabase.storage.from('seller-media').getPublicUrl(path)
+  return data.publicUrl
+}
+
+export async function uploadItemImage(profileId, itemId, file) {
+  if (!supabase) throw new Error('Supabase client not initialized.')
+  const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
+  const MAX_SIZE = 5 * 1024 * 1024
+  if (!ACCEPTED.includes(file.type)) throw new Error('Formato no permitido. Usa JPG, PNG o WebP.')
+  if (file.size > MAX_SIZE) throw new Error('La imagen es muy grande. Máximo 5 MB.')
+  const ext = file.name.split('.').pop().toLowerCase() || 'jpg'
+  const path = `items/${profileId}/${itemId}.${ext}`
+  const { error } = await supabase.storage
+    .from('seller-media')
+    .upload(path, file, { upsert: true, contentType: file.type })
+  if (error) throw error
   const { data } = supabase.storage.from('seller-media').getPublicUrl(path)
   return data.publicUrl
 }

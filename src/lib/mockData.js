@@ -290,3 +290,31 @@ export const MOCK_USER = {
   is_verified: false,
   avatar: null,
 }
+
+// Seller propio del usuario mock — se usa en SellerPanel y Booth cuando isMockMode=true
+export const MOCK_MY_SELLER = {
+  id: 'my-seller',
+  profile_id: 'user-1',
+  name: 'Javier D.',
+  username: 'javierd',
+  group: 'creativos',
+  category: 'UX/UI',
+  boothType: 'services',
+  badge: null,
+  accent: 'blue',
+  cover: null,
+  avatar: null,
+  rating: 4.8,
+  reviews: 3,
+  is_verified: false,
+  title: 'Mi Tienda',
+  tagline: 'Aquí irá tu tagline',
+  bio: null,
+  location: null,
+  socialLinks: {},
+  keywords: [],
+  items: [
+    { id: 'my-s1', title: 'Mi primer servicio', price: 'Desde $100 USD', delivery: '7 días', image: null },
+  ],
+  services: [],
+}
