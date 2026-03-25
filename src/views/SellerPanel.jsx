@@ -100,6 +100,13 @@ export default function SellerPanel() {
     })
   }, [seller])
 
+  useEffect(() => {
+    return () => {
+      if (brandAvatarPreview) URL.revokeObjectURL(brandAvatarPreview)
+      if (brandCoverPreview)  URL.revokeObjectURL(brandCoverPreview)
+    }
+  }, [brandAvatarPreview, brandCoverPreview])
+
   const BOOTH_TAB_LABEL = { services: 'Servicios', catalog: 'Productos', courses: 'Cursos', hybrid: 'Catálogo' }
 
   const TABS = [
@@ -215,15 +222,15 @@ export default function SellerPanel() {
   function handleAvatarChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
+    setBrandAvatarPreview(prev => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(file) })
     setBrandAvatarFile(file)
-    setBrandAvatarPreview(URL.createObjectURL(file))
   }
 
   function handleCoverChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
+    setBrandCoverPreview(prev => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(file) })
     setBrandCoverFile(file)
-    setBrandCoverPreview(URL.createObjectURL(file))
   }
 
   function addKeyword() {
@@ -289,6 +296,8 @@ export default function SellerPanel() {
       }))
       setBrandAvatarFile(null)
       setBrandCoverFile(null)
+      setBrandAvatarPreview(null)
+      setBrandCoverPreview(null)
       setToast({ message: 'Marca actualizada', type: 'success' })
     } catch (err) {
       setToast({ message: err.message ?? 'Error al guardar', type: 'error' })
