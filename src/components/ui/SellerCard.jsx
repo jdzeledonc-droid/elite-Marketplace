@@ -66,6 +66,11 @@ export default function SellerCard({ seller }) {
             <Badge variant="category" className="mt-[var(--space-1)]">
               {seller.category}
             </Badge>
+            {seller.location && (
+              <p className="text-2xs text-[var(--color-text-muted)] mt-[var(--space-1)]">
+                · {seller.location.split(',')[0]}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-[var(--space-1)] flex-shrink-0">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="text-[var(--color-warning)]" aria-hidden="true">
