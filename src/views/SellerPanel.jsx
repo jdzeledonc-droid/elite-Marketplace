@@ -5,10 +5,11 @@ import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Modal from '../components/ui/Modal'
+import Toast from '../components/ui/Toast'
 import NavBar from '../components/layout/NavBar'
 import { MOCK_SELLERS } from '../lib/mockData'
 import { useAuth } from '../hooks/useAuth'
-import { isMockMode, fetchMySellerProfile, updateSellerItems, updateSellerBrand, fetchMyLeads } from '../lib/supabase'
+import { isMockMode, fetchMySellerProfile, updateSellerItems, updateSellerBrand, uploadSellerImage, fetchMyLeads } from '../lib/supabase'
 
 // Generate a simple unique id for new items
 function newId() {
@@ -41,6 +42,31 @@ export default function SellerPanel() {
   const [profileForm, setProfileForm]       = useState({ title: '', tagline: '', cover_url: '' })
   const [profileSaving, setProfileSaving]   = useState(false)
 
+  const BRAND_ACCENT_OPTIONS = [
+    { key: 'black',  color: '#000000' },
+    { key: 'blue',   color: '#3b82f6' },
+    { key: 'green',  color: '#10b981' },
+    { key: 'red',    color: '#ef4444' },
+    { key: 'yellow', color: '#f59e0b' },
+    { key: 'purple', color: '#8b5cf6' },
+    { key: 'orange', color: '#f97316' },
+    { key: 'teal',   color: '#14b8a6' },
+    { key: 'pink',   color: '#ec4899' },
+  ]
+
+  const [brandForm, setBrandForm] = useState({
+    title: '', tagline: '', bio: '', accent: 'black',
+    location: '', instagram: '', whatsapp: '', facebook: '', tiktok: '', website: '',
+    keywords: [],
+  })
+  const [brandAvatarFile, setBrandAvatarFile]         = useState(null)
+  const [brandCoverFile, setBrandCoverFile]           = useState(null)
+  const [brandAvatarPreview, setBrandAvatarPreview]   = useState(null)
+  const [brandCoverPreview, setBrandCoverPreview]     = useState(null)
+  const [brandSaving, setBrandSaving]                 = useState(false)
+  const [keywordInput, setKeywordInput]               = useState('')
+  const [toast, setToast]                             = useState(null)
+
   useEffect(() => {
     if (isMockMode || !currentUser) return
     fetchMySellerProfile(currentUser.id)
@@ -57,12 +83,30 @@ export default function SellerPanel() {
       .finally(() => setLeadsLoading(false))
   }, [currentUser])
 
+  useEffect(() => {
+    if (!seller) return
+    setBrandForm({
+      title:     seller.title    ?? '',
+      tagline:   seller.tagline  ?? '',
+      bio:       seller.bio      ?? '',
+      accent:    seller.accent   ?? 'black',
+      location:  seller.location ?? '',
+      instagram: seller.socialLinks?.instagram ?? '',
+      whatsapp:  seller.socialLinks?.whatsapp  ?? '',
+      facebook:  seller.socialLinks?.facebook  ?? '',
+      tiktok:    seller.socialLinks?.tiktok    ?? '',
+      website:   seller.socialLinks?.website   ?? '',
+      keywords:  seller.keywords ?? [],
+    })
+  }, [seller])
+
   const BOOTH_TAB_LABEL = { services: 'Servicios', catalog: 'Productos', courses: 'Cursos', hybrid: 'Catálogo' }
 
   const TABS = [
     { key: 'services', label: BOOTH_TAB_LABEL[seller?.boothType] ?? 'Servicios' },
     { key: 'leads',    label: 'Leads' },
     { key: 'stats',    label: 'Stats' },
+    { key: 'brand',    label: 'Marca' },
   ]
 
   const MOCK_LEADS = [
@@ -155,9 +199,102 @@ export default function SellerPanel() {
     setEditingProfile(false)
 
     if (!isMockMode) {
-      try { await updateSellerBrand(seller.id, profileForm) } catch (_) { /* silent */ }
+      try {
+        await updateSellerBrand(seller.id, {
+          title:     profileForm.title,
+          tagline:   profileForm.tagline,
+          cover_url: profileForm.cover_url,
+        })
+      } catch (_) { /* silent */ }
     }
     setProfileSaving(false)
+  }
+
+  // ── Brand handlers ─────────────────────────────────────────────────────────
+
+  function handleAvatarChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setBrandAvatarFile(file)
+    setBrandAvatarPreview(URL.createObjectURL(file))
+  }
+
+  function handleCoverChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setBrandCoverFile(file)
+    setBrandCoverPreview(URL.createObjectURL(file))
+  }
+
+  function addKeyword() {
+    const kw = keywordInput.trim()
+    if (!kw || brandForm.keywords.length >= 10 || brandForm.keywords.includes(kw)) return
+    setBrandForm(prev => ({ ...prev, keywords: [...prev.keywords, kw] }))
+    setKeywordInput('')
+  }
+
+  function removeKeyword(kw) {
+    setBrandForm(prev => ({ ...prev, keywords: prev.keywords.filter(k => k !== kw) }))
+  }
+
+  async function saveBrand() {
+    setBrandSaving(true)
+    try {
+      let avatar_url = seller.avatar ?? null
+      let cover_url  = seller.cover  ?? null
+
+      if (!isMockMode) {
+        if (brandAvatarFile) avatar_url = await uploadSellerImage(currentUser.id, brandAvatarFile, 'avatar')
+        if (brandCoverFile)  cover_url  = await uploadSellerImage(currentUser.id, brandCoverFile, 'cover')
+      } else {
+        if (brandAvatarPreview) avatar_url = brandAvatarPreview
+        if (brandCoverPreview)  cover_url  = brandCoverPreview
+      }
+
+      const social_links = Object.fromEntries(
+        Object.entries({
+          instagram: brandForm.instagram,
+          whatsapp:  brandForm.whatsapp,
+          facebook:  brandForm.facebook,
+          tiktok:    brandForm.tiktok,
+          website:   brandForm.website,
+        }).filter(([, v]) => v.trim())
+      )
+
+      if (!isMockMode) {
+        await updateSellerBrand(seller.id, {
+          title:        brandForm.title,
+          tagline:      brandForm.tagline,
+          bio:          brandForm.bio      || null,
+          location:     brandForm.location || null,
+          social_links,
+          keywords:     brandForm.keywords,
+          avatar_url,
+          cover_url,
+          accent:       brandForm.accent,
+        })
+      }
+
+      setSeller(prev => ({
+        ...prev,
+        title:       brandForm.title,
+        tagline:     brandForm.tagline,
+        bio:         brandForm.bio      || null,
+        accent:      brandForm.accent,
+        location:    brandForm.location || null,
+        socialLinks: social_links,
+        keywords:    brandForm.keywords,
+        avatar:      avatar_url,
+        cover:       cover_url,
+      }))
+      setBrandAvatarFile(null)
+      setBrandCoverFile(null)
+      setToast({ message: 'Marca actualizada', type: 'success' })
+    } catch (err) {
+      setToast({ message: err.message ?? 'Error al guardar', type: 'error' })
+    } finally {
+      setBrandSaving(false)
+    }
   }
 
   // ── Render guards ─────────────────────────────────────────────────────────
@@ -333,9 +470,169 @@ export default function SellerPanel() {
             </div>
           </section>
         )}
+
+        {/* Marca */}
+        {activeTab === 'brand' && (
+          <section id="tabpanel-brand" role="tabpanel" aria-label="Gestor de marca" className="flex flex-col gap-[var(--space-6)]">
+
+            {/* Identidad Visual */}
+            <div>
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-4)]">
+                Identidad Visual
+              </p>
+              <div className="flex gap-[var(--space-4)] items-start mb-[var(--space-5)]">
+                {/* Avatar */}
+                <label className="cursor-pointer flex-shrink-0" aria-label="Cambiar avatar">
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                    onChange={handleAvatarChange} />
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden bg-[var(--color-bg-tertiary)] border-2 border-dashed border-[var(--color-border-medium)] flex items-center justify-center">
+                    {(brandAvatarPreview || seller.avatar) ? (
+                      <img src={brandAvatarPreview ?? seller.avatar} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" stroke="var(--color-text-muted)" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    )}
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-full">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </label>
+
+                {/* Cover */}
+                <label className="cursor-pointer flex-1" aria-label="Cambiar cover">
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                    onChange={handleCoverChange} />
+                  <div className="relative h-16 rounded-[var(--radius-xl)] overflow-hidden bg-[var(--color-bg-tertiary)] border-2 border-dashed border-[var(--color-border-medium)] flex items-center justify-center">
+                    {(brandCoverPreview || seller.cover) ? (
+                      <img src={brandCoverPreview ?? seller.cover} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <p className="text-xs text-[var(--color-text-muted)]">Portada</p>
+                    )}
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              {/* Accent color picker */}
+              <div className="flex gap-[var(--space-3)]" role="group" aria-label="Color de acento">
+                {BRAND_ACCENT_OPTIONS.map(({ key, color }) => (
+                  <button key={key} type="button"
+                    onClick={() => setBrandForm(prev => ({ ...prev, accent: key }))}
+                    aria-label={`Color ${key}`} aria-pressed={brandForm.accent === key}
+                    className={['w-7 h-7 rounded-full transition-transform',
+                      brandForm.accent === key ? 'scale-125 ring-2 ring-offset-2 ring-[var(--color-text-primary)]' : '',
+                    ].join(' ')}
+                    style={{ background: color }} />
+                ))}
+              </div>
+            </div>
+
+            {/* Perfil Público */}
+            <div className="flex flex-col gap-[var(--space-4)]">
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
+                Perfil Público
+              </p>
+              <Input label="Claim profesional"
+                value={brandForm.title}
+                onChange={e => setBrandForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Ej: UX Generalist" />
+              <Input label="Tagline"
+                value={brandForm.tagline}
+                onChange={e => setBrandForm(prev => ({ ...prev, tagline: e.target.value }))}
+                placeholder="Diseño que convierte visitantes en clientes" />
+              <div>
+                <p className="text-xs font-semibold text-[var(--color-text-secondary)] mb-[var(--space-2)] ml-[var(--space-1)]">
+                  Sobre mí
+                </p>
+                <textarea
+                  value={brandForm.bio}
+                  onChange={e => { if (e.target.value.length <= 300) setBrandForm(prev => ({ ...prev, bio: e.target.value })) }}
+                  placeholder="Cuéntale a los clientes quién eres y qué haces..."
+                  rows={3}
+                  className="w-full px-[var(--space-4)] py-[var(--space-3)] rounded-[var(--radius-xl)] border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-sm text-[var(--color-text-primary)] resize-none focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+                />
+                <p className="text-2xs text-[var(--color-text-muted)] text-right mt-[var(--space-1)]">
+                  {brandForm.bio.length}/300
+                </p>
+              </div>
+            </div>
+
+            {/* Ubicación + Redes */}
+            <div className="flex flex-col gap-[var(--space-4)]">
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
+                Ubicación + Redes
+              </p>
+              <Input label="Ciudad / Provincia"
+                value={brandForm.location}
+                onChange={e => setBrandForm(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="San José, Costa Rica" />
+              {[
+                { key: 'instagram', label: 'Instagram', placeholder: '@usuario' },
+                { key: 'whatsapp',  label: 'WhatsApp',  placeholder: '+50688888888' },
+                { key: 'facebook',  label: 'Facebook',  placeholder: 'usuario o URL' },
+                { key: 'tiktok',    label: 'TikTok',    placeholder: '@usuario' },
+                { key: 'website',   label: 'Sitio web', placeholder: 'https://...' },
+              ].map(({ key, label, placeholder }) => (
+                <Input key={key} label={label}
+                  value={brandForm[key]}
+                  onChange={e => setBrandForm(prev => ({ ...prev, [key]: e.target.value }))}
+                  placeholder={placeholder} />
+              ))}
+            </div>
+
+            {/* Keywords SEO */}
+            <div>
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-[var(--space-3)]">
+                Keywords SEO
+                <span className="normal-case font-normal ml-[var(--space-2)]">({brandForm.keywords.length}/10)</span>
+              </p>
+              <div className="flex gap-[var(--space-2)] mb-[var(--space-3)]">
+                <input
+                  value={keywordInput}
+                  onChange={e => setKeywordInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addKeyword() } }}
+                  placeholder="Ej: diseño web"
+                  className="flex-1 px-[var(--space-4)] py-[var(--space-3)] rounded-[var(--radius-xl)] border border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+                  disabled={brandForm.keywords.length >= 10}
+                />
+                <button type="button" onClick={addKeyword}
+                  disabled={!keywordInput.trim() || brandForm.keywords.length >= 10}
+                  className="px-[var(--space-4)] py-[var(--space-3)] rounded-[var(--radius-xl)] bg-[var(--color-bg-tertiary)] text-sm font-bold text-[var(--color-text-secondary)] hover:bg-[var(--color-border-medium)] transition-colors disabled:opacity-40">
+                  + Añadir
+                </button>
+              </div>
+              {brandForm.keywords.length > 0 && (
+                <div className="flex flex-wrap gap-[var(--space-2)]">
+                  {brandForm.keywords.map(kw => (
+                    <button key={kw} type="button" onClick={() => removeKeyword(kw)}
+                      className="flex items-center gap-[var(--space-1)] px-[var(--space-3)] py-[var(--space-1)] rounded-[var(--radius-full)] bg-[var(--color-bg-tertiary)] border border-[var(--color-border-light)] text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-error)]/10 hover:border-[var(--color-error)]/30 hover:text-[var(--color-error)] transition-colors"
+                      aria-label={`Eliminar keyword ${kw}`}>
+                      {kw}
+                      <span aria-hidden="true" className="text-xs opacity-60">×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Guardar */}
+            <Button variant="primary" className="w-full" onClick={saveBrand} disabled={brandSaving}>
+              {brandSaving ? 'Guardando…' : 'Guardar cambios'}
+            </Button>
+          </section>
+        )}
       </main>
 
       <NavBar />
+
+      <Toast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
 
       {/* ── Item modal ──────────────────────────────────────────────────────── */}
       <Modal
