@@ -36,19 +36,27 @@ export function AuthProvider({ children }) {
 
   async function loadProfile(authUser) {
     try {
-      const { data: profile } = await supabase
+      let { data: profile } = await supabase
         .from('profiles')
         .select('full_name, avatar_url, user_role, is_verified')
         .eq('id', authUser.id)
         .single()
 
+      // Si no existe el perfil (usuario registrado antes de las migraciones), crearlo
+      if (!profile) {
+        const name = authUser.user_metadata?.full_name ?? authUser.email
+        const role = authUser.user_metadata?.user_role ?? 'buyer'
+        await supabase.from('profiles').upsert({ id: authUser.id, full_name: name, user_role: role })
+        profile = { full_name: name, avatar_url: null, user_role: role, is_verified: false }
+      }
+
       setCurrentUser({
         id:          authUser.id,
         email:       authUser.email,
-        name:        profile?.full_name  ?? authUser.email,
-        avatar:      profile?.avatar_url ?? null,
-        user_role:   profile?.user_role  ?? 'buyer',
-        is_verified: profile?.is_verified ?? false,
+        name:        profile.full_name  ?? authUser.email,
+        avatar:      profile.avatar_url ?? null,
+        user_role:   profile.user_role  ?? 'buyer',
+        is_verified: profile.is_verified ?? false,
       })
     } catch (_) {
       setCurrentUser({ id: authUser.id, email: authUser.email, name: authUser.email, avatar: null, user_role: 'buyer', is_verified: false })

@@ -47,7 +47,7 @@ export default function Settings() {
     try {
       if (!isMockMode) {
         if (accountForm.name !== currentUser.name) {
-          await supabase.from('profiles').update({ full_name: accountForm.name }).eq('id', currentUser.id)
+          await supabase.from('profiles').upsert({ id: currentUser.id, full_name: accountForm.name })
           updateCurrentUser({ name: accountForm.name })
         }
         if (accountForm.email !== currentUser.email) {
