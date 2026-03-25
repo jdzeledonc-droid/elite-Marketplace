@@ -276,7 +276,7 @@ export default function SellerPanel() {
               Mi Marca
             </Button>
             <Button variant="secondary" size="sm"
-              onClick={() => seller && navigate(`/seller/${seller.id}`)}
+              onClick={() => seller && navigate(`/seller/${seller.id}`, { state: { seller } })}
               disabled={!seller} aria-label="Ver mi tienda pública">
               Ver mi tienda
             </Button>

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Avatar from '../components/ui/Avatar'
 import Badge from '../components/ui/Badge'
@@ -876,13 +876,21 @@ function HybridBooth({ seller, accent, navigate }) {
 export default function Booth() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // If navigated from SellerPanel, use the live seller state directly
+  const passedSeller = location.state?.seller ?? null
   const allMockSellers = [...MOCK_SELLERS, MOCK_MY_SELLER]
-  const [seller, setSeller] = useState(isMockMode ? (allMockSellers.find(s => s.id === id) ?? null) : null)
-  const [loading, setLoading] = useState(!isMockMode)
+  const [seller, setSeller] = useState(
+    passedSeller
+      ? passedSeller
+      : isMockMode ? (allMockSellers.find(s => s.id === id) ?? null) : null
+  )
+  const [loading, setLoading] = useState(!passedSeller && !isMockMode)
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
-    if (isMockMode) return
+    if (passedSeller || isMockMode) return
     fetchSeller(id)
       .then(setSeller)
       .catch(() => setNotFound(true))
