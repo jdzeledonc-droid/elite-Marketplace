@@ -61,3 +61,66 @@ export async function fetchMySellerProfile(profileId) {
   if (error) return null
   return normalizeSeller(data)
 }
+
+export async function updateSellerItems(sellerId, items) {
+  const { error } = await supabase
+    .from('sellers')
+    .update({ items })
+    .eq('id', sellerId)
+  if (error) throw error
+}
+
+export async function updateSellerProfile(sellerId, { title, tagline, cover_url }) {
+  const { error } = await supabase
+    .from('sellers')
+    .update({ title, tagline, cover_url })
+    .eq('id', sellerId)
+  if (error) throw error
+}
+
+export async function fetchMyLeads(profileId) {
+  const { data, error } = await supabase
+    .from('leads')
+    .select('id, mensaje, servicio_interes, status, created_at, buyer:buyer_id(full_name)')
+    .eq('seller_id', profileId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data.map(row => ({
+    id:      row.id,
+    buyer:   row.buyer?.full_name ?? 'Comprador',
+    service: row.servicio_interes ?? 'Sin especificar',
+    message: row.mensaje,
+    status:  row.status ?? 'pending',
+    time:    formatRelativeTime(row.created_at),
+  }))
+}
+
+export async function fetchMyTransactions(profileId) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('id, amount, status, description, created_at, seller:seller_id(full_name)')
+    .eq('buyer_id', profileId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data.map(row => ({
+    id:      row.id,
+    service: row.description ?? 'Pedido',
+    seller:  row.seller?.full_name ?? 'Vendedor',
+    amount:  `₡${Number(row.amount ?? 0).toLocaleString('es-CR')}`,
+    status:  row.status ?? 'pending',
+    date:    formatDate(row.created_at),
+  }))
+}
+
+function formatRelativeTime(iso) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `Hace ${mins}m`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `Hace ${hrs}h`
+  return `Hace ${Math.floor(hrs / 24)}d`
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('es-CR', { day: 'numeric', month: 'short', year: 'numeric' })
+}

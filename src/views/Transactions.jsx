@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Badge from '../components/ui/Badge'
 import NavBar from '../components/layout/NavBar'
+import { useAuth } from '../hooks/useAuth'
+import { isMockMode, fetchMyTransactions } from '../lib/supabase'
 
 const MOCK_TRANSACTIONS = [
   { id: 't1', service: 'Diseño de App Móvil',     seller: 'Sofia Martínez', amount: '$800 USD',  status: 'completed', date: '12 Mar 2026' },
@@ -14,6 +17,19 @@ const STATUS_VARIANTS = { pending: 'warning', completed: 'success', disputed: 'e
 
 export default function Transactions() {
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
+  const [transactions, setTransactions] = useState([])
+  const [loading, setLoading] = useState(!isMockMode)
+
+  useEffect(() => {
+    if (isMockMode || !currentUser) return
+    fetchMyTransactions(currentUser.id)
+      .then(setTransactions)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [currentUser])
+
+  const displayTransactions = isMockMode ? MOCK_TRANSACTIONS : transactions
 
   return (
     <div className="flex flex-col min-h-dvh bg-[var(--color-bg-primary)]">
@@ -31,7 +47,11 @@ export default function Transactions() {
       </header>
 
       <main className="flex-1 px-[var(--space-5)] py-[var(--space-6)] pb-32">
-        {MOCK_TRANSACTIONS.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="w-6 h-6 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
+          </div>
+        ) : displayTransactions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-md font-bold text-[var(--color-text-primary)]">Sin pedidos</p>
             <p className="text-sm text-[var(--color-text-tertiary)] mt-[var(--space-2)]">
@@ -40,7 +60,7 @@ export default function Transactions() {
           </div>
         ) : (
           <ul className="flex flex-col gap-[var(--space-3)]" role="list" aria-label="Historial de pedidos">
-            {MOCK_TRANSACTIONS.map(tx => (
+            {displayTransactions.map(tx => (
               <li key={tx.id}>
                 <article className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-light)] rounded-[var(--radius-2xl)] p-[var(--space-5)]">
                   <div className="flex items-start justify-between gap-[var(--space-3)]">
